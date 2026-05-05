@@ -1,0 +1,23 @@
+.wrapper {
+    position: relative;
+    display: inline-block;
+    color: var(--color-base-general-70);
+}
+.icon{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--color-base-general-100);
+    width: 16px;
+    height: 16px;
+    &.left{
+        left: var(--space-3);
+    }
+    &.right{
+        right: var(--space-3);
+    }
+}
+.disabled{
+    color: var(--color-base-general-80)
+}

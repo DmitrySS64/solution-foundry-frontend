@@ -1,0 +1,36 @@
+.base {
+    display: inline-flex;
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-base-general-80);
+    padding: 0;
+    outline: none;
+    border: none;
+    border-radius: var(--space-1);
+    width: 24px;
+    height: 24px;
+
+
+    &:hover:not(:disabled){
+        background-color: color-mix(in srgb, black 5%, transparent);
+        outline: none;
+    }
+    &:active:not(:disabled) {
+        background-color: color-mix(in srgb, black 10%, transparent);
+        transform: scale(0.98);
+    }
+
+    &.hasPadding {
+        width: 32px;
+        height: 32px;
+    }
+
+    &.bActive {
+        background-color: var(--color-secondary);
+        color: var(--color-secondary-foreground);
+        &[hover]{
+            background-color: var(--color-secondary) 80%;
+        }
+    }
+}

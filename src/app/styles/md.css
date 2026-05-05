@@ -1,0 +1,237 @@
+/* editor.css или globals.css */
+
+/* Контейнер редактора */
+.editor-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+}
+
+.editor-container {
+    position: relative;
+    min-height: 500px;
+    padding: 20px;
+}
+
+.editor-content-editable {
+    position: relative;
+    outline: none;
+    min-height: 500px;
+}
+
+.editor-placeholder {
+    position: absolute;
+    top: 30px;
+    left: 50px;
+    color: #94a3b8;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ========== СТИЛИ ДЛЯ СПИСКОВ ========== */
+
+/* Маркированный список */
+.editor-list-ul {
+    display: block;
+    list-style-type: disc;
+    margin: 12px 0;
+    padding-left: 24px;
+    color: #5a607f;
+}
+
+/* Нумерованный список */
+.editor-list-ol {
+    display: block;
+    list-style-type: decimal;
+    margin: 12px 0;
+    padding-left: 24px;
+    color: #5a607f;
+}
+
+/* Элемент списка */
+.editor-listitem {
+    display: list-item;
+    margin: 4px 0;
+    padding: 2px 0;
+}
+
+/* Вложенные списки - разные уровни */
+.editor-list-ul .editor-list-ul {
+    list-style-type: circle;
+    margin: 4px 0;
+}
+
+.editor-list-ul .editor-list-ul .editor-list-ul {
+    list-style-type: square;
+}
+
+.editor-list-ol .editor-list-ol {
+    list-style-type: lower-alpha;
+}
+
+.editor-list-ol .editor-list-ol .editor-list-ol {
+    list-style-type: lower-roman;
+}
+
+/* Чекбоксы для todo-списков (опционально) */
+.editor-listitem-checked {
+    list-style-type: none;
+    position: relative;
+}
+
+.editor-listitem-checked::before {
+    content: "✓";
+    position: absolute;
+    left: -20px;
+    color: #22c55e;
+}
+
+.editor-listitem-unchecked {
+    list-style-type: none;
+    position: relative;
+}
+
+.editor-listitem-unchecked::before {
+    content: "○";
+    position: absolute;
+    left: -20px;
+    color: #64748b;
+}
+
+/* Базовая типография */
+.editor-paragraph {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.editor-heading-h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 24px 0 16px;
+    line-height: 1.2;
+}
+
+.editor-heading-h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 20px 0 12px;
+    line-height: 1.3;
+}
+
+.editor-code {
+    background-color: #1e1e2e;
+    color: #e2e8f0;
+    font-family: 'Fira Code', monospace;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin: 12px 0;
+    overflow-x: auto;
+}
+
+.editor-quote {
+    border-left: 4px solid #3b82f6;
+    padding-left: 16px;
+    margin: 12px 0;
+    color: #475569;
+    font-style: italic;
+}
+
+/* Темная тема */
+.dark .editor-wrapper {
+    background: #1e293b;
+}
+
+.dark .editor-paragraph {
+    color: #e2e8f0;
+}
+
+.dark .editor-heading-h1,
+.dark .editor-heading-h2 {
+    color: #f1f5f9;
+}
+
+.dark .editor-quote {
+    color: #94a3b8;
+}
+
+
+[data-lexical-list="ul"],
+.editor-list-ul {
+    display: block !important;
+    list-style-type: disc !important;
+    margin-block-start: 1em !important;
+    margin-block-end: 1em !important;
+    padding-inline-start: 40px !important;
+}
+
+[data-lexical-list="ol"],
+.editor-list-ol {
+    display: block !important;
+    list-style-type: decimal !important;
+    margin-block-start: 1em !important;
+    margin-block-end: 1em !important;
+    padding-inline-start: 40px !important;
+}
+
+[data-lexical-listitem="true"],
+.editor-listitem {
+    display: list-item !important;
+    list-style-type: inherit !important;
+}
+
+
+/* Контейнер таблицы */
+.editor-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: 16px 0;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+    font-size: 14px;
+}
+
+/* Строка таблицы */
+.editor-table-row {
+    border: none;
+}
+
+/* Ячейка таблицы */
+.editor-table-cell {
+    border: 1px solid #cbd5e1;
+    min-width: 80px;
+    padding: 8px 12px;
+    vertical-align: top;
+    background-color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+/* Ячейка-заголовок */
+.editor-table-cell-header {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    border-bottom-width: 2px;
+}
+
+/* Выделение ячеек при курсоре */
+.lexical-table-cell-selected {
+    background-color: #dbeafe;
+}
+
+/* Темная тема */
+.dark .editor-table-cell {
+    border-color: #475569;
+    background-color: #1e293b;
+}
+
+.dark .editor-table-cell-header {
+    background-color: #334155;
+}
+
+.dark .lexical-table-cell-selected {
+    background-color: #3b82f6;
+}

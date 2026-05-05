@@ -1,0 +1,31 @@
+.editorHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-bg);
+    color: var(--color-text-label);
+}
+
+.block{
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-4);
+}
+
+.tool{
+    height: var(--space-6);
+    width: var(--space-6);
+    border-radius: var(--space-1);
+
+    &:hover{
+        cursor: pointer;
+        color: var(--color-base-general-100);
+        background-color: var(--color-base-general-50);
+
+    }
+    &[data-status = active]{
+        background-color: var(--color-base-general-30);
+    }
+}

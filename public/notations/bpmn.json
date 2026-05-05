@@ -1,0 +1,106 @@
+{
+  "id": "bpmn",
+  "name": "BPMN 2.0",
+  "version": "1.0",
+  "elements": [
+    {
+      "type": "bpmn-task",
+      "name": "Задача",
+      "extends": "shape",
+      "icon": "mdiSquare",
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 140,
+        "height": 70,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "Новая задача" },
+        { "name": "taskType", "label": "Тип задачи", "type": "select",
+          "options": ["user", "service", "script", "businessRule"],
+          "default": "user" },
+        { "name": "isAsync", "label": "Асинхронная", "type": "boolean", "default": false }
+      ]
+    },
+    {
+      "type": "bpmn-gateway",
+      "name": "Шлюз",
+      "extends": "shape",
+      "icon": "mdiRhombus",
+      "defaults": {
+        "shapeType": "diamond",
+        "width": 80,
+        "height": 80,
+        "style": {
+          "fill": "#FEF3C7",
+          "stroke": "#F59E0B"
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "" },
+        { "name": "gatewayType", "label": "Тип шлюза", "type": "select",
+          "options": ["exclusive", "parallel", "inclusive", "event"],
+          "default": "exclusive" }
+      ]
+    },
+    {
+      "type": "bpmn-event",
+      "name": "Событие",
+      "extends": "shape",
+      "icon": "mdiCircle",
+      "defaults": {
+        "shapeType": "circle",
+        "width": 60,
+        "height": 60,
+        "style": {
+          "fill": "#F3E8FF",
+          "stroke": "#9333EA"
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "" },
+        { "name": "eventType", "label": "Тип события", "type": "select",
+          "options": ["start", "intermediate", "end"],
+          "default": "intermediate" }
+      ]
+    },
+    {
+      "type": "bpmn-pool",
+      "name": "Пул",
+      "extends": "zone",
+      "icon": "mdiShape",
+      "defaults": {
+        "width": 600,
+        "height": 200,
+        "style": {
+          "fill": "transparent",
+          "stroke": "#475569",
+          "strokeWidth": 2
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название пула", "type": "text", "default": "Пул" },
+        { "name": "orientation", "label": "Ориентация", "type": "select",
+          "options": ["horizontal", "vertical"],
+          "default": "horizontal" }
+      ]
+    }
+  ],
+  "connections": {
+    "allowedTypes": ["bpmn-task", "bpmn-gateway", "bpmn-event"],
+    "edgeDefaults": {
+      "stroke": "#475569",
+      "strokeWidth": 2,
+      "endArrow": "default"
+    }
+  },
+  "validationRules": [
+    { "rule": "startEventRequired", "message": "Диаграмма должна содержать начальное событие" },
+    { "rule": "noOrphanedNodes", "message": "Все элементы должны быть связаны" }
+  ]
+}

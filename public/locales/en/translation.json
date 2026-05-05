@@ -1,0 +1,38 @@
+{
+  "NATitle": "Notation Architect",
+  "description": {
+    "part1": "To get started, edit <1>src/App.js</1> and save for reloading.",
+    "part2": "Switch language between english and russian using buttons above."
+  },
+  "recent_changes_page": {
+    "changes": {
+      "desc": "File change history",
+      "title": "Recent changes"
+    },
+    "files": {
+      "desc": "Recently edited files",
+      "title": "Recent files"
+    },
+    "greeting": "Welcome to the Notation Architect",
+    "projects": {
+      "desc": "Recently opened projects",
+      "files": "files",
+      "title": "Recent projects"
+    },
+    "subtitle": "Your projects, documents and diagrams in one place",
+    "time": {
+      "ago": "ago",
+      "days": "{{count}} day ago",
+      "days2": "{{count}} days ago",
+      "days3": "{{count}} days ago",
+      "hours": "{{count}} hour ago",
+      "hours2": "{{count}} hours ago",
+      "hours3": "{{count}} hours ago",
+      "min": "{{count}} min ago",
+      "min2": "{{count}} mins ago",
+      "min3": "{{count}} mins ago"
+    }
+  },
+  "search": "Search diagrams, documents...",
+  "title": "Welcome to react using react-i18next"
+}

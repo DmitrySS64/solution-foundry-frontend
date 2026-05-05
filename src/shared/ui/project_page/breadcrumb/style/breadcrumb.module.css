@@ -1,0 +1,10 @@
+.breadcrumb {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    color: var(--color-text-base);
+    gap: var(--space-1);
+    a{
+        color: var(--color-text-base);
+    }
+}

@@ -1,0 +1,18 @@
+.user{
+    display: inline-flex;
+    flex-direction: row;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-label);
+    user-select: none;
+    .icon{
+        border-radius: var(--space-4_5);
+        width: var(--space-9);
+        height: var(--space-9);
+    }
+    .btn{
+        width: var(--space-6);
+        height: var(--space-6);
+    }
+}

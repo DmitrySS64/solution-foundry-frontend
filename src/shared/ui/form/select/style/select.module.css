@@ -1,0 +1,116 @@
+.trigger {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--space-1);
+    padding: var(--space-2) var(--space-4) var(--space-2) var(--space-4);
+
+    user-select: none;
+    font-family: var(--font-sans), serif;
+    font-size: 16px;
+    gap: var(--space-1);
+    background-color: var(--color-bg);
+
+    border: 1px solid var(--color-border);
+    color: var(--color-base-general-100);
+
+    transition: var(--transition-fast);
+    outline: none;
+    appearance: none;
+    resize: none;
+    cursor: pointer;
+
+    &::placeholder{
+        color: var(--color-text-placeholder);
+    }
+    &:hover:not(:disabled){
+
+    }
+    &:focus-visible {
+        border: 1px solid var(--color-base-primary-80);
+    }
+    &:disabled {
+        background-color: #f1f4fa;
+        color: var(--color-base-general-80);
+    }
+    &:disabled::placeholder {
+        color: var(--color-base-general-80);
+    }
+}
+
+.wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 300px;
+
+    &::before,
+    &::after{
+        --size: 0.3rem;
+        position: absolute;
+        content: "";
+        right: 1rem;
+        pointer-events: none;
+    }
+    &::before {
+        border-left: var(--size) solid transparent;
+        border-right: var(--size) solid transparent;
+        border-bottom: var(--size) solid black;
+        top: 40%;
+    }
+    &::after {
+        border-left: var(--size) solid transparent;
+        border-right: var(--size) solid transparent;
+        border-top: var(--size) solid black;
+        top: 55%;
+    }
+}
+
+.content{
+    overflow: hidden;
+    background: white;
+    font-family: var(--font-sans), serif;
+    font-size: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--space-1);
+}
+
+.Viewport{
+    padding: var(--space-1);
+}
+
+.item{
+    padding: var(--space-1) var(--space-2);
+    display: flex;
+    align-items: center;
+    user-select: none;
+    &[data-disabled]{
+        pointer-events: none;
+    }
+
+}
+.label{
+    padding: var(--space-1) var(--space-2);
+}
+.selectButton {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: var(--color-base-general-100);
+    pointer-events: none;
+
+    & svg{
+        transform: translateY(10%)
+    }
+}
+.separator{
+    margin: var(--space-1) var(--space-2);
+    height: 1px;
+    user-select: none;
+    justify-content: center;
+    background: var(--color-border);
+
+}

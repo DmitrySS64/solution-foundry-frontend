@@ -1,0 +1,9 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-2_5) var(--space-15);
+    background-color: var(--color-surface);
+    box-shadow: #D9E1EC 0 -1px 0 0 inset;
+    height: var(--space-15);
+}

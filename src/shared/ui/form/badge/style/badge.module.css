@@ -1,0 +1,26 @@
+.base{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    font-family: var(--font-sans), sans-serif;
+    font-weight: 400;
+
+    color: white;
+    background-color: var(--color-base-primary-100);
+
+    border-radius: var(--space-1);
+
+    &.medium{
+        padding: var(--space-1) var(--space-2);
+    }
+    &.small{
+        padding: 2px var(--space-2);
+    }
+
+    &.light{
+        color: var(--color-base-primary-100);
+        background-color: color-mix(in srgb, var(--color-base-primary-100) 14%, transparent);
+    }
+}
