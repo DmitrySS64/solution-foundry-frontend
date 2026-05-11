@@ -98,7 +98,7 @@ const createShape = (
 
 // Рендер фигуры
 const renderShape = (element: IShape, props: IRenderProps): React.ReactNode => {
-    const { isConnecting, onDragEnd, onClick } = props;
+    const { isConnecting, onDragEnd, onClick, onMouseDown, onMouseUp, onDblClick} = props;
     const fill = isConnecting ? '#ff0000' : element.style.fill;
     const stroke = isConnecting ? '#ff0000' : element.style.stroke;
     const strokeWidth = isConnecting ? 3 : element.style.strokeWidth;
@@ -146,6 +146,9 @@ const renderShape = (element: IShape, props: IRenderProps): React.ReactNode => {
             draggable={!props.isConnecting} // u можно перетаскивать всегда, кроме режима соединения
             onDragEnd={(e) => onDragEnd(element.id, e.target.x(), e.target.y())}
             onClick={() => onClick(element.id)}
+            onMouseDown={() => onMouseDown?.(element.id)}
+            onMouseUp={() => onMouseUp?.(element.id)}
+            onDblClick={() => onDblClick?.(element.id)}
         >
             {shape}
             <KonvaText

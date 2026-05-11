@@ -6,13 +6,14 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: path.resolve(__dirname),
   base: "/",
   plugins: [
       react(),
       tailwindcss(),
       visualizer({
-        filename: 'dist/stats.html',
-        open: true,
+        filename: path.resolve(__dirname, 'dist/stats.html'),
+        open: false,
         gzipSize: true,
         brotliSize: true,
       }),

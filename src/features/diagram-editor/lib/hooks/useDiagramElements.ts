@@ -70,6 +70,15 @@ export const useDiagramElements = (initialElements: IBaseElement[] = []) => {
         return null;
     }, []);
 
+    const addEdge = useCallback((fromId: string, toId: string) => {
+        const edge = elementRegistry.createElement('edge', { x: 0, y: 0 }, { fromId, toId });
+        if (edge) {
+            setElements(prev => [...prev, edge]);
+            return edge;
+        }
+        return null;
+    }, []);
+
     const updateElement = useCallback((id: string, updates: Record<string, any>) => {
         setElements(prev =>
             prev.map(el => {
@@ -104,6 +113,7 @@ export const useDiagramElements = (initialElements: IBaseElement[] = []) => {
         setSelectedId,
         updateElements,
         addElement,
+        addEdge,
         updateElement,
         deleteElement
     };

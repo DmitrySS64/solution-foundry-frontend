@@ -1,89 +1,72 @@
-import {useState} from "react";
-import Konva from "konva";
+// hooks/useConvas.ts
+import { useRef, useState, useCallback } from 'react';
+import Konva from 'konva';
 
-const useConvas = (
-    readOnly: boolean,
-    updateElement:(id: string, updates: Record<string, any>) => void
-) => {
-    const [scale, setScale] = useState(1);
-    const [stageOffset, setStageOffset] = useState({ x: 0, y: 0 }); // сдвиг камеры
+interface UseConvasProps {
+    readOnly: boolean;
+}
+
+export const useConvas = ({ readOnly }: UseConvasProps) => {
+    const layerRef = useRef<Konva.Layer>(null);          // ссылка на слой для прямого управления
+    const [stageOffset, setStageOffset] = useState({ x: 0, y: 0 });
     const [bounds, setBounds] = useState({
         minX: -500,
         maxX: 500,
         minY: -500,
         maxY: 500,
     });
-    const [isPanning, setIsPanning] = useState(false);
-    const [lastPointerPos, setLastPointerPos] = useState({ x: 0, y: 0 });
+    const [scale, setScale] = useState(1);
 
-    // Обработчики для перетаскивания фона (не фигур)
+    const isPanning = useRef(false);
+    const lastPointerPos = useRef({ x: 0, y: 0 });
+    const offsetRef = useRef(stageOffset); // синхронизированный слой-реф
+
+    // Панорамирование (прямое управление)
     const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (e.target === e.target.getStage() && !readOnly) {
-            setIsPanning(true);
-            setLastPointerPos({ x: e.evt.clientX, y: e.evt.clientY });
+            isPanning.current = true;
+            lastPointerPos.current = { x: e.evt.clientX, y: e.evt.clientY };
         }
     };
 
     const handleStageMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-        if (isPanning) {
-            const dx = e.evt.clientX - lastPointerPos.x;
-            const dy = e.evt.clientY - lastPointerPos.y;
-            const newX = stageOffset.x + dx;
-            const newY = stageOffset.y + dy;
-            // Ограничиваем панорамирование текущими границами
-            setStageOffset({
-                x: Math.min(bounds.maxX, Math.max(bounds.minX, newX)),
-                y: Math.min(bounds.maxY, Math.max(bounds.minY, newY)),
-            });
-            setLastPointerPos({ x: e.evt.clientX, y: e.evt.clientY });
-        }
+        if (!isPanning.current || !layerRef.current) return;
+        const dx = e.evt.clientX - lastPointerPos.current.x;
+        const dy = e.evt.clientY - lastPointerPos.current.y;
+        const newX = offsetRef.current.x + dx;
+        const newY = offsetRef.current.y + dy;
+
+        // Прямое смещение слоя (без React state)
+        layerRef.current.x(newX);
+        layerRef.current.y(newY);
+        layerRef.current.batchDraw(); // принудительная отрисовка
+
+        offsetRef.current = { x: newX, y: newY };
+        lastPointerPos.current = { x: e.evt.clientX, y: e.evt.clientY };
     };
 
     const handleStageMouseUp = () => {
-        setIsPanning(false);
-    };
-
-    const handleDragEnd = (id: string, x: number, y: number) => {
-        updateElement(id, { position: { x, y } });
-
-        // Расширяем границы с запасом
-        const margin = 300; // запас для добавления новой области
-        const newBounds = { ...bounds };
-        let changed = false;
-
-        if (x < bounds.minX) {
-            newBounds.minX = x - margin;
-            changed = true;
-        }
-        if (x > bounds.maxX) {
-            newBounds.maxX = x + margin;
-            changed = true;
-        }
-        if (y < bounds.minY) {
-            newBounds.minY = y - margin;
-            changed = true;
-        }
-        if (y > bounds.maxY) {
-            newBounds.maxY = y + margin;
-            changed = true;
-        }
-
-        if (changed) {
-            setBounds(newBounds);
+        if (isPanning.current) {
+            isPanning.current = false;
+            // Синхронизируем React состояние после окончания панорамирования
+            setStageOffset(offsetRef.current);
         }
     };
 
+    // Zoom (Ctrl+колесо)
     const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
         if (!readOnly && e.evt.ctrlKey) {
             e.evt.preventDefault();
             const stage = e.target.getStage();
-            if (!stage) return;
+            if (!stage || !layerRef.current) return;
             const oldScale = scale;
             const pointer = stage.getPointerPosition();
             if (!pointer) return;
+
+            // Координаты точки под курсором в локальной системе слоя
             const mousePointTo = {
-                x: (pointer.x - stageOffset.x) / oldScale,
-                y: (pointer.y - stageOffset.y) / oldScale,
+                x: (pointer.x - offsetRef.current.x) / oldScale,
+                y: (pointer.y - offsetRef.current.y) / oldScale,
             };
             const delta = e.evt.deltaY > 0 ? 0.9 : 1.1;
             const newScale = Math.min(3, Math.max(0.1, oldScale * delta));
@@ -91,21 +74,44 @@ const useConvas = (
                 x: pointer.x - mousePointTo.x * newScale,
                 y: pointer.y - mousePointTo.y * newScale,
             };
+
+            // Применяем новое масштабирование и смещение к слою
+            layerRef.current.scaleX(newScale);
+            layerRef.current.scaleY(newScale);
+            layerRef.current.x(newOffset.x);
+            layerRef.current.y(newOffset.y);
+            layerRef.current.batchDraw();
+
             setScale(newScale);
             setStageOffset(newOffset);
+            offsetRef.current = newOffset;
         }
     };
 
+    // Расширение границ при перетаскивании фигуры (вызывается из onDragEnd)
+    const expandBounds = useCallback((x: number, y: number) => {
+        const margin = 500;
+        let changed = false;
+        setBounds(prev => {
+            const newBounds = { ...prev };
+            if (x < prev.minX) { newBounds.minX = x - margin; changed = true; }
+            if (x > prev.maxX) { newBounds.maxX = x + margin; changed = true; }
+            if (y < prev.minY) { newBounds.minY = y - margin; changed = true; }
+            if (y > prev.maxY) { newBounds.maxY = y + margin; changed = true; }
+            return changed ? newBounds : prev;
+        });
+    }, []);
+
     return {
-        scale,
+        layerRef,
         stageOffset,
         bounds,
+        scale,
         handleStageMouseDown,
         handleStageMouseMove,
         handleStageMouseUp,
-        handleDragEnd,
-        handleWheel
-    }
-}
-
-export { useConvas }
+        handleWheel,
+        expandBounds,
+        setBounds,
+    };
+};

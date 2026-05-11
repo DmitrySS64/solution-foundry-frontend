@@ -4,6 +4,7 @@ import {
     Layer,
     Line, Transformer,
 } from 'react-konva';
+import type { ReactElement } from 'react';
 import Konva from 'konva';
 import './DiagramEditor.css'
 import {
@@ -20,7 +21,7 @@ import LibraryPanel from "@features/diagram-editor/ui/LibraryPanel.tsx";
 import {useDiagramElements} from "@features/diagram-editor/lib/hooks/useDiagramElements.ts";
 import {useConnection} from "@features/diagram-editor/lib/hooks/useConnection.ts";
 import {useConvas} from "@features/diagram-editor/lib/hooks/useConvas.ts";
-import type {KonvaEventObject, NodeConfig} from "konva/lib/Node";
+import type {IShape} from "@features/diagram-editor/lib/elements/shape.tsx";
 
 
 // Регистрируем все типы элементов при загрузке
@@ -41,36 +42,30 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
         elements,
         selectedId,
         setSelectedId,
-        updateElements,
         addElement,
+        addEdge,
         updateElement,
         deleteElement
     } = useDiagramElements(initialElements);
 
     const {
+        layerRef,
         scale,
         stageOffset,
         bounds,
         handleStageMouseDown,
         handleStageMouseMove,
         handleStageMouseUp,
-        handleWheel
-    } = useConvas(readOnly, updateElement);
+        handleWheel,
+        expandBounds
+    } = useConvas({readOnly});
 
-    const addEdge = (fromId: string, toId: string) => {
-        return null;
-    }
     const {
         connectingFrom,
         mousePosition, setMousePosition,
         startConnection, endConnection
     } = useConnection(addEdge)
 
-    const [editingShapeId, setEditingShapeId] = useState<string | null>(null);
-
-    //const [elements, setElements] = useState<IBaseElement[]>(initialElements);
-    //const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
-    //const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
     const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 
@@ -80,6 +75,10 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
     // Получение выбранного элемента
     const selectedElement = elements.find(el => el.id === selectedId) || null;
     const selectedType = selectedElement?.type || '';
+
+    useEffect(() => {
+        onChange?.(elements);
+    }, [elements, onChange]);
 
     // При изменении selectedId обновляем трансформер
     useEffect(() => {
@@ -99,6 +98,21 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
         }
         transformer.getLayer()?.batchDraw();
     }, [selectedId, elements]);
+
+    const handleShapeDoubleClick = (id: string) => {
+        const shape = elements.find(el => el.id === id) as IShape;
+        if (shape) {
+            const newLabel = prompt('Введите текст:', shape.label);
+            if (newLabel !== null) {
+                updateElement(id, { label: newLabel });
+            }
+        }
+    };
+
+    const handleShapeDragEnd = useCallback((id: string, x: number, y: number) => {
+        updateElement(id, { position: { x, y } });
+        expandBounds(x, y); // расширяем границы при необходимости
+    }, [updateElement, expandBounds]);
 
     // Получение позиции фигуры для рендера связей
     const getElementPosition = useCallback((id: string): { x: number; y: number } | null => {
@@ -120,7 +134,7 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
         const step = 24;
         const startX = Math.floor(bounds.minX / step) * step;
         const startY = Math.floor(bounds.minY / step) * step;
-        const lines = [];
+        const lines: ReactElement[] = [];
         for (let x = startX; x <= bounds.maxX; x += step) {
             lines.push(<Line key={`v-${x}`} points={[x, bounds.minY, x, bounds.maxY]} stroke="#ddd" strokeWidth={1} />);
         }
@@ -151,6 +165,8 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
                         isConnecting: false,
                         onDragEnd: () => {},
                         onClick: (id) => setSelectedId(id),
+                        onMouseDown: (id) => startConnection(id),
+                        onMouseUp: (id) => endConnection(id),
                         fromPosition: fromPos || undefined,
                         toPosition: toPos || undefined,
                         onDelete: deleteElement,
@@ -165,17 +181,18 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
                     const shapeProps : IRenderProps = {
                         isSelected: element.id === selectedId,
                         isConnecting: connectingFrom === element.id,
-                        onDragEnd: (id: string, x: number, y: number) => {
-                            updateElement(id, { position: { x, y } });
-                        },
+                        onDragEnd: handleShapeDragEnd,
                         onClick: (id) => setSelectedId(id),
+                        onMouseDown: (id) => startConnection(id),
+                        onMouseUp: (id) => endConnection(id),
+                        onDblClick: (id) => handleShapeDoubleClick(id)
                     }
 
                     return definition.render(element, shapeProps);
                 })}
             </>
         );
-    }, [elements, getElementPosition, selectedId, deleteElement, setSelectedId, connectingFrom, updateElement]);
+    }, [elements, getElementPosition, selectedId, deleteElement, setSelectedId, connectingFrom, handleShapeDragEnd, startConnection, endConnection]);
 
     // Временная линия при создании связи
     const renderTemporaryLine = useCallback(() => {
@@ -249,24 +266,24 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
                     {/*
                         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
                     */}
+
                     <Stage
                         ref={stageRef}
                         width={window.innerWidth - (leftSidebarOpen ? 256 : 0) - (rightSidebarOpen ? 320 : 0)}
                         height={window.innerHeight}
-                        className="flex-1 bg-white dark:bg-zinc-950"
+                        className="flex-1 bg-zinc-100 dark:bg-zinc-900"
                         onMouseDown={handleStageMouseDown}
-                        onMouseMove={handleStageMouseMove}
-                        //onMouseMove={(e) => {
-                        //    const stage = e.target.getStage();
-                        //    if (stage) {
-                        //        const pos = stage.getPointerPosition();
-                        //        if (pos) setMousePosition(pos);
-                        //    }
-                        //}}
+                        onMouseMove={(e) => {
+                            handleStageMouseMove(e);
+                            const stage = e.target.getStage();
+                            const pos = stage?.getPointerPosition();
+                            if (pos) setMousePosition(pos);
+                        }}
                         onWheel={handleWheel}
                         onMouseUp={handleStageMouseUp}
                     >
                         <Layer
+                            ref={layerRef}
                             x={stageOffset.x}
                             y={stageOffset.y}
                             scaleX={scale}
@@ -278,6 +295,7 @@ export const DiagramEditor: React.FC<IDiagramEditorProps> = ({
                                 ref={transformerRef}
                                 anchorSize={8}
                                 borderDash={[6, 2]}
+                                keepRatio={false}
                                 boundBoxFunc={(oldBox, newBox) => {
                                     // Минимальные размеры
                                     if (newBox.width < 40 || newBox.height < 30) return oldBox;

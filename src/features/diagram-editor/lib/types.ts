@@ -28,6 +28,9 @@ interface IRenderProps {
     isConnecting: boolean;
     onDragEnd: (id: string, x: number, y: number) => void;
     onClick: (id: string) => void;
+    onMouseDown?: (id: string) => void;
+    onMouseUp?: (id: string) => void;
+    onDblClick?: (id: string) => void;
 }
 
 interface IEdgeRenderProps extends IRenderProps {
