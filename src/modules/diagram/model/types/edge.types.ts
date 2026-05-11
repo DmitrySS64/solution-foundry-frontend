@@ -4,7 +4,11 @@ interface EdgePoint {
     y: number
 }
 
-type EdgeType = 'straight' | 'orthogonal' | 'bezier'
+type EdgeType =
+    | 'straight'
+    | 'orthogonal'
+    | 'bezier'
+
 
 interface EdgeAnchor {
     nodeId?: string

@@ -44,6 +44,7 @@ import {
     mdiBell,
     mdiCog,
     mdiClock,
+    mdiSquare,
     mdiFolder, mdiDrawingBox, mdiCircle, mdiFilter, mdiGrid
 } from "@mdi/js"
 
@@ -63,6 +64,7 @@ const ICON_PATHS = {
     DONE: mdiCheck ,
     BELL: mdiBell,
     CIRCLE: mdiCircle,
+    SQUARE: mdiSquare,
     BOX: mdiDrawingBox,
     CHECK: mdiCheck,
     SETTINGS: mdiCog,

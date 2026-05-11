@@ -18,6 +18,8 @@ export const syncEdgeKonva = (
     const refs = edgeRegistry.get(edge.id)
     if (!refs) return
 
+    // keep caps in sync when edge geometry changes
+    // (Arrow components use Konva attrs; without updating them, they may reset)
     const resolved = resolveEdgePoints(edge, nodes)
     if (resolved.length < 2) return
     const flat = flattenEdgePoints(resolved)

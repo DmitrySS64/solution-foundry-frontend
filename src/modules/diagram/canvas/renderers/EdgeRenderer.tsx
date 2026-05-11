@@ -56,8 +56,13 @@ const EdgeRenderer = ({
     const resolvedPoints =
         resolveEdgePoints(edge, nodes)
 
+    // React-рендер стрелок использует points напрямую, но Line/Arrow не должны
+    // получать «промежуточные» значения во время динамического обновления связи.
+    // Поэтому, если geometry выглядит некорректно (например, всего 1 точка),
+    // прячем точки и оставляем объекты невидимыми.
     const points =
         flattenEdgePoints(resolvedPoints)
+
 
     const getPointerInLayer = (
         target: Konva.Node,
@@ -151,9 +156,15 @@ const EdgeRenderer = ({
             />
 
             {edge.style.startCap === 'arrow' && (
+
                 <Arrow
                     ref={startCapRef}
-                    points={[0, 0, 0, 0]}
+                    points={[
+                        resolvedPoints[1].x,
+                        resolvedPoints[1].y,
+                        resolvedPoints[0].x,
+                        resolvedPoints[0].y,
+                    ]}
                     stroke={edge.style.stroke}
                     fill={edge.style.stroke}
                     strokeWidth={edge.style.strokeWidth}
@@ -164,9 +175,15 @@ const EdgeRenderer = ({
             )}
 
             {edge.style.endCap === 'arrow' && (
+
                 <Arrow
                     ref={endCapRef}
-                    points={[0, 0, 0, 0]}
+                    points={[
+                        resolvedPoints[resolvedPoints.length - 2].x,
+                        resolvedPoints[resolvedPoints.length - 2].y,
+                        resolvedPoints[resolvedPoints.length - 1].x,
+                        resolvedPoints[resolvedPoints.length - 1].y,
+                    ]}
                     stroke={edge.style.stroke}
                     fill={edge.style.stroke}
                     strokeWidth={edge.style.strokeWidth}
@@ -175,6 +192,8 @@ const EdgeRenderer = ({
                     listening={false}
                 />
             )}
+
+
 
             {edge.label && labelPoint && (
                 <Text
@@ -197,6 +216,7 @@ const EdgeRenderer = ({
                     listening={false}
                 />
             )}
+
         </Group>
     )
 }

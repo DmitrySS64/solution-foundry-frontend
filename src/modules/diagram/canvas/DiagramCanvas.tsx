@@ -27,9 +27,17 @@ const DiagramCanvas = () => {
         setViewport,
         deleteSelection,
         setAnchorHighlightNodeId,
+        selectNode,
+        undo,
+        redo,
     } = useEditorStore(state => state.actions)
 
+    const pastLen = useEditorStore(state => state.history.past.length)
+    const futureLen = useEditorStore(state => state.history.future.length)
+
+
     // STAGE
+
     const stageRef =
         useRef<Konva.Stage>(null)
 
@@ -311,18 +319,16 @@ const DiagramCanvas = () => {
             return
         }
 
-        // selection box
+        // click on empty canvas -> clear selection
         if (e.target === stage) {
+            selectNode(null)
+            deleteSelection()
 
-            const pos =
-                stage.getPointerPosition()
+            const pos = stage.getPointerPosition()
+            if (!pos) return
 
-            if (!pos) {
-                return
-            }
-
+            // selection box
             selectionStart.current = pos
-
             selectionBox.current = {
                 active: true,
                 x: pos.x,
@@ -332,7 +338,9 @@ const DiagramCanvas = () => {
             }
 
             requestDraw('overlay')
+            return
         }
+
     }
 
     const handleMouseMove = (
@@ -498,14 +506,29 @@ const DiagramCanvas = () => {
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key !== 'Delete') {
-                return
-            }
-
-            // не перехватываем Delete при вводе в инпуты инспектора
+            // не перехватываем хоткеи при вводе в инпуты/контент-эдиторы
             const target = event.target as HTMLElement | null
             const tag = target?.tagName?.toLowerCase()
             if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) {
+                return
+            }
+
+            // Ctrl/Cmd+Z => Undo, Ctrl/Cmd+Y => Redo
+            if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
+                if (pastLen === 0) return
+                event.preventDefault()
+                undo()
+                return
+            }
+
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') {
+                if (futureLen === 0) return
+                event.preventDefault()
+                redo()
+                return
+            }
+
+            if (event.key !== 'Delete') {
                 return
             }
 
@@ -517,7 +540,8 @@ const DiagramCanvas = () => {
         return () => {
             window.removeEventListener('keydown', onKeyDown)
         }
-    }, [deleteSelection])
+    }, [deleteSelection, pastLen, futureLen, undo, redo])
+
 
     // RENDER
     return (

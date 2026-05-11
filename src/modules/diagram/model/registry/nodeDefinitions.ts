@@ -117,13 +117,22 @@ const nodeDefinitions: NodeDefinition[] = [
             primitives: [
                 {
                     type: 'rect',
-                    x: 0,
+                    x: 0.5,
                     y: 0,
                     width: 1,
-                    height: 1,
+                    height: 0.6,
                     fill: '#EEF2FF',
                     stroke: '#4F46E5',
                     strokeWidth: 2,
+                },
+                {
+                    type: 'circle',
+                    x: 0.5,
+                    y: 0.5,
+                    radius: 0.2,
+                    fill: '#FFFFFF',
+                    stroke: '#16A34A',
+                    strokeWidth: 3,
                 },
                 {
                     type: 'text',
