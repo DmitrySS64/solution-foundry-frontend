@@ -9,12 +9,19 @@ import {
     useViewport,
 } from '../store/selectors'
 
+import { useEditorStore } from '../store/editor.store'
+
+
 const DiagramToolbar = () => {
     const { addNode, undo, redo } = useEditorActions()
     const viewport = useViewport()
 
-    const pastLen = useEditorActions(s => s.history.past.length)
-    const futureLen = useEditorActions(s => s.history.future.length)
+    // past/future lengths come from history snapshots
+    const pastLen = useEditorStore(s => s.history.past.length)
+
+    const futureLen = useEditorStore(s => s.history.future.length)
+
+
 
     return (
         <div className="flex w-full px-4 items-center gap-2">

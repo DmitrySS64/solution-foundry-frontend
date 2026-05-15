@@ -6,6 +6,8 @@ import {useEffect, useLayoutEffect, useRef} from 'react'
 import {edgeRegistry} from '@/modules/diagram/model/registry/edgeRegistry.ts'
 import {syncEdgeKonva} from '@/modules/diagram/model/util/syncEdgeKonva.ts'
 import {useEditorActions, useNodes} from '@/modules/diagram/store/selectors.ts'
+import {getKonvaFontStyle} from './labelStyleUtils'
+
 import {
     flattenEdgePoints,
     resolveEdgePoints,
@@ -203,14 +205,10 @@ const EdgeRenderer = ({
                     fontSize={labelStyle.fontSize}
                     fontFamily={labelStyle.fontFamily}
                     fontStyle={
-                        labelStyle.fontStyle === 'italic'
-                            && labelStyle.fontWeight === 'bold'
-                            ? 'italic bold'
-                            : labelStyle.fontStyle === 'italic'
-                                ? 'italic'
-                                : labelStyle.fontWeight === 'bold'
-                                    ? 'bold'
-                                    : 'normal'
+                        getKonvaFontStyle({
+                            fontStyle: labelStyle.fontStyle as any,
+                            fontWeight: labelStyle.fontWeight as any,
+                        })
                     }
                     fill={labelStyle.fill}
                     listening={false}

@@ -1,16 +1,28 @@
 import type {
     NodeNotation,
-    NodePrimitive,
     NodeType,
 } from '../types/node.types'
+
+
+import type {
+    NotationBoxRules,
+} from './notationRegistry'
+
+import {notations} from './notationRegistry'
+
 
 interface NodeDefinition {
     type: NodeType
     label: string
     notation: NodeNotation
+    notationGroupId?: string
+    box: NotationBoxRules
+    renderLabel: boolean
 }
 
+
 const defaultProperties = [
+
     {
         name: 'description',
         label: 'Описание',
@@ -19,7 +31,8 @@ const defaultProperties = [
     },
 ]
 
-const nodeDefinitions: NodeDefinition[] = [
+const baseDefinitions: NodeDefinition[] = [
+
     {
         type: 'rectangle',
         label: 'Rectangle',
@@ -37,7 +50,15 @@ const nodeDefinitions: NodeDefinition[] = [
                 },
             ],
         },
+        box: {
+            initialWidth: 160,
+            initialHeight: 80,
+            canStretch: true,
+            preserveAspectRatio: false,
+        },
+        renderLabel: true,
     },
+
     {
         type: 'circle',
         label: 'Circle',
@@ -54,6 +75,13 @@ const nodeDefinitions: NodeDefinition[] = [
                 },
             ],
         },
+        box: {
+            initialWidth: 160,
+            initialHeight: 160,
+            canStretch: false,
+            preserveAspectRatio: true,
+        },
+        renderLabel: true,
     },
     {
         type: 'diamond',
@@ -72,118 +100,36 @@ const nodeDefinitions: NodeDefinition[] = [
                 },
             ],
         },
-    },
-    {
-        type: 'bpmn.start-event',
-        label: 'BPMN Start Event',
-        notation: {
-            id: 'bpmn.start-event',
-            name: 'BPMN Start Event',
-            properties: defaultProperties,
-            primitives: [
-                {
-                    type: 'circle',
-                    x: 0.5,
-                    y: 0.5,
-                    radius: 0.45,
-                    fill: '#FFFFFF',
-                    stroke: '#16A34A',
-                    strokeWidth: 3,
-                },
-            ],
+        box: {
+            initialWidth: 160,
+            initialHeight: 80,
+            canStretch: true,
+            preserveAspectRatio: false,
         },
-    },
-    {
-        type: 'bpmn.task',
-        label: 'BPMN Task',
-        notation: {
-            id: 'bpmn.task',
-            name: 'BPMN Task',
-            properties: [
-                ...defaultProperties,
-                {
-                    name: 'title',
-                    label: 'Заголовок',
-                    type: 'text' as const,
-                    value: 'Task',
-                },
-                {
-                    name: 'assignee',
-                    label: 'Исполнитель',
-                    type: 'text' as const,
-                    value: '',
-                },
-            ],
-            primitives: [
-                {
-                    type: 'rect',
-                    x: 0.5,
-                    y: 0,
-                    width: 1,
-                    height: 0.6,
-                    fill: '#EEF2FF',
-                    stroke: '#4F46E5',
-                    strokeWidth: 2,
-                },
-                {
-                    type: 'circle',
-                    x: 0.5,
-                    y: 0.5,
-                    radius: 0.2,
-                    fill: '#FFFFFF',
-                    stroke: '#16A34A',
-                    strokeWidth: 3,
-                },
-                {
-                    type: 'text',
-                    x: 0.06,
-                    y: 0.1,
-                    width: 0.88,
-                    height: 0.5,
-                    textKey: 'title',
-                    fill: '#111827',
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    align: 'center',
-                },
-                {
-                    type: 'text',
-                    x: 0.06,
-                    y: 0.62,
-                    width: 0.88,
-                    height: 0.28,
-                    textKey: 'assignee',
-                    fill: '#334155',
-                    fontSize: 11,
-                    align: 'center',
-                },
-            ],
-        },
-    },
-    {
-        type: 'bpmn.gateway',
-        label: 'BPMN Gateway',
-        notation: {
-            id: 'bpmn.gateway',
-            name: 'BPMN Gateway',
-            properties: defaultProperties,
-            primitives: [
-                {
-                    type: 'diamond',
-                    x: 0,
-                    y: 0,
-                    width: 1,
-                    height: 1,
-                    fill: '#FFFBEB',
-                    stroke: '#D97706',
-                    strokeWidth: 2,
-                },
-            ],
-        },
+        renderLabel: true,
     },
 ]
 
+const nodeDefinitions: NodeDefinition[] = [
+    ...baseDefinitions.map(d => ({
+        ...d,
+        notationGroupId: undefined,
+    })),
+    ...notations.map(n => ({
+        type: n.type,
+        label: n.label,
+        notation: n.notation,
+        notationGroupId: n.notationId,
+        box: n.box,
+        renderLabel: n.renderLabel ?? true,
+    })),
+
+]
+
+
+
 const getNodeDefinition = (
+
     type: NodeType,
 ) => nodeDefinitions.find(
     definition => definition.type === type
@@ -200,11 +146,12 @@ const cloneNotation = (
             : undefined,
     })),
     primitives: notation.primitives?.map(
-        (primitive: NodePrimitive) => ({
+        primitive => ({
             ...primitive,
         }),
     ),
 })
+
 
 export {
     nodeDefinitions,

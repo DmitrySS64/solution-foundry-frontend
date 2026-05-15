@@ -386,21 +386,23 @@ const ShapeRenderer = ({
                 )
             })}
 
-            <Text
-                width={node.width}
-                height={node.height}
+            {node.renderLabel !== false && (
+                <Text
+                    width={node.width}
+                    height={node.height}
 
-                text={node.label}
+                    text={node.label}
 
-                fill={textStyle.fill}
-                fontSize={textStyle.fontSize}
-                fontFamily={textStyle.fontFamily}
-                fontStyle={konvaFontStyle}
-                align={textStyle.align}
-                verticalAlign="middle"
+                    fill={textStyle.fill}
+                    fontSize={textStyle.fontSize}
+                    fontFamily={textStyle.fontFamily}
+                    fontStyle={konvaFontStyle}
+                    align={textStyle.align}
+                    verticalAlign="middle"
 
-                listening={false}
-            />
+                    listening={false}
+                />
+            )}
             {(hovered || anchorHighlight) && (
                 <>
                     {anchors.map(anchor => (

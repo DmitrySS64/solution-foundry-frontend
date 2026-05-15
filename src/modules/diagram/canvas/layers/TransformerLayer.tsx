@@ -44,6 +44,12 @@ const TransformerLayer = ({
     const keepRatio =
         selectedNodes.length > 0
             && selectedNodes.every(node => {
+                    const preserve = (selectedNodes.find(n => n.id === (node as any).id) as any)?.preserveAspectRatio
+
+                if (typeof preserve === 'boolean') {
+                    return preserve
+                }
+
                 const primitives = node.notation?.primitives
                 if (!primitives || primitives.length === 0) {
                     return node.type === 'circle'
@@ -103,10 +109,13 @@ const TransformerLayer = ({
 
                 if (!transformer) return
 
-                transformer.nodes().forEach(node => {
+                transformer.nodes().forEach((node) => {
 
                     const box =
                         node.getClientRect()
+
+
+
 
                     const width =
                         Math.max(
@@ -120,9 +129,12 @@ const TransformerLayer = ({
                             box.height
                         )
 
+                    const canStretch = (selectedNodes.find(n => n.id === (node as any).id()) as any)?.canStretch
+
                     updateNode(node.id(), {
-                        width,
-                        height,
+                        width: canStretch === false ? Math.max(40, node.width()) : width,
+                        height: canStretch === false ? Math.max(40, node.height()) : height,
+
                         rotation: node.rotation(),
                     })
 

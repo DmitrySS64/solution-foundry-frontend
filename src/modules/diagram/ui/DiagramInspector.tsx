@@ -155,7 +155,6 @@ const NodeInspector = ({
                                     },
                                 })
                             }
-                            className={fieldClass}
                         />
                     </PropertyField>
 
@@ -171,7 +170,6 @@ const NodeInspector = ({
                                     },
                                 })
                             }
-                            className={fieldClass}
                         />
                     </PropertyField>
 
@@ -223,7 +221,6 @@ const NodeInspector = ({
                                     },
                                 })
                             }
-                            className={fieldClass}
                         />
                     </PropertyField>
 
@@ -306,26 +303,33 @@ const NodeInspector = ({
                                 key={property.name}
                                 label={property.label}
                             >
-                                <input
-                                    value={String(property.value)}
-                                    onChange={(e) =>
-                                        updateNode(node.id, {
-                                            notation: {
-                                                ...node.notation!,
-                                                properties:
-                                                    node.notation!.properties.map(item =>
-                                                        item.name === property.name
-                                                            ? {
-                                                                ...item,
-                                                                value: e.target.value,
-                                                            }
-                                                            : item
-                                                    ),
-                                            },
-                                        })
-                                    }
-                                    className={fieldClass}
-                                />
+                                {property.editable === false ? (
+                                    <div className='pt-2 text-sm text-zinc-900'>
+                                        {String(property.value)}
+                                    </div>
+                                ) : (
+                                    <input
+                                        value={String(property.value)}
+                                        onChange={(e) =>
+                                            updateNode(node.id, {
+                                                notation: {
+                                                    ...node.notation!,
+                                                    properties:
+                                                        node.notation!.properties.map(item =>
+                                                            item.name === property.name
+                                                                ? {
+                                                                    ...item,
+                                                                    value: e.target.value,
+                                                                }
+                                                                : item
+                                                        ),
+                                                },
+                                            })
+                                        }
+                                        className={fieldClass}
+                                        aria-label={property.label}
+                                    />
+                                )}
                             </PropertyField>
                         ))}
                     </Section>
@@ -404,7 +408,6 @@ const EdgeInspector = ({
                                     },
                                 })
                             }
-                            className={fieldClass}
                         />
                     </PropertyField>
 
@@ -455,7 +458,6 @@ const EdgeInspector = ({
                                     },
                                 })
                             }
-                            className={fieldClass}
                         />
                     </PropertyField>
 

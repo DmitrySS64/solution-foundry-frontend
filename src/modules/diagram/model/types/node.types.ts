@@ -28,7 +28,9 @@ interface NodeNotationProperty {
     type: 'text' | 'number' | 'color' | 'select' | 'boolean'
     value: string | number | boolean
     options?: string[]
+    editable?: boolean
 }
+
 
 interface NodePrimitive {
     type: 'rect' | 'circle' | 'diamond' | 'text' | 'svg'
@@ -81,7 +83,20 @@ interface DiagramNode {
 
     //zIndex: number
 
+    // Политики отображения/рендера.
+    // Если false — node.label не рендерим.
+    renderLabel?: boolean
+
+    // Политики растяжения/пропорций.
+    // Если false — запрещаем менять width/height при resize.
+    canStretch?: boolean
+
+    // Если true — сохраняем пропорции при resize.
+    preserveAspectRatio?: boolean
+
     createdAt: number
+
+
     updatedAt: number
 
     edges: {

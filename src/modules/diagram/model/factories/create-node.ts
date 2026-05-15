@@ -19,8 +19,8 @@ export const createNode = (
         type,
         x,
         y,
-        width: 160,
-        height: 80,
+        width: definition?.box?.initialWidth ?? 160,
+        height: definition?.box?.initialHeight ?? 80,
         rotation: 0,
         label: 'Node',
         style: {
@@ -44,5 +44,6 @@ export const createNode = (
         createdAt: now,
         updatedAt: now,
         edges: [],
+        renderLabel: definition?.renderLabel ?? true,
     }
 }
