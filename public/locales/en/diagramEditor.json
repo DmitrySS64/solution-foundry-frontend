@@ -1,4 +1,72 @@
 {
+  "toolbar": {
+    "undo": "Undo (Ctrl+Z)",
+    "redo": "Redo (Ctrl+Y)",
+    "addRectangle": "Add rectangle"
+  },
+  "sidebar": {
+    "library": "Library",
+    "group": {
+      "bpmn": "BPMN",
+      "uml": "UML",
+      "c4": "C4",
+      "base": "Base"
+    }
+  },
+  "inspector": {
+    "noneSelected": "Nothing selected",
+    "node": {
+      "properties": "Node properties",
+      "content": "Content",
+      "label": "Label",
+      "block": "Block",
+      "fill": "Fill",
+      "stroke": "Border",
+      "cornerRadius": "Corner radius",
+      "text": "Text",
+      "textColor": "Text color",
+      "fontSize": "Font size",
+      "font": "Font",
+      "fontStyle": {
+        "normal": "Normal",
+        "bold": "Bold",
+        "italic": "Italic",
+        "italicBold": "Italic bold"
+      },
+      "align": "Alignment",
+      "alignment": {
+        "left": "Left",
+        "center": "Center",
+        "right": "Right"
+      },
+      "notation": "Notation",
+      "type": "Type",
+      "addTag": "Add tag",
+      "tag": "Tag",
+      "string": "String"
+    },
+    "edge": {
+      "properties": "Edge properties",
+      "content": "Content",
+      "label": "Label",
+      "text": "Text",
+      "color": "Color",
+      "fontSize": "Font size",
+      "line": "Line",
+      "lineType": "Type",
+      "straight": "Straight",
+      "orthogonal": "Orthogonal",
+      "bezier": "Bezier",
+      "caps": "Caps",
+      "start": "Start",
+      "end": "End",
+      "none": "None",
+      "arrow": "Arrow",
+      "points": "Control points",
+      "addPoint": "Add point"
+    }
+  },
   "Unsaved": "Unsaved changes",
   "title": "Diagram Editor"
 }
+

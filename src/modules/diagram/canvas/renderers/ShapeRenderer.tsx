@@ -33,6 +33,7 @@ import {edgeRegistry} from "@/modules/diagram/model/registry/edgeRegistry.ts";
 import {
     syncEdgeKonva,
 } from "@/modules/diagram/model/util/syncEdgeKonva.ts";
+import { customRendererRegistry } from '@/modules/diagram/canvas/customRenderers';
 
 const SvgNodeImage = ({
     svg,
@@ -252,7 +253,12 @@ const ShapeRenderer = ({
                 onFinishConnection(node.id)
             }}
         >
-            {node.notation?.svg && (
+            {node.customRendererId && (() => {
+                const renderer = customRendererRegistry.get(node.customRendererId!);
+                return renderer ? renderer({ node }) : null;
+            })()}
+
+            {(!node.customRendererId || !customRendererRegistry.get(node.customRendererId)) && node.notation?.svg && (
                 <SvgNodeImage
                     svg={node.notation.svg}
                     width={node.width}
@@ -260,7 +266,9 @@ const ShapeRenderer = ({
                 />
             )}
 
-            {!node.notation?.svg && primitives.map((primitive, index) => {
+            {(!node.customRendererId || !customRendererRegistry.get(node.customRendererId)) &&
+                (!node.notation?.svg) &&
+                primitives.map((primitive, index) => {
                 const primitiveWidth =
                     scaleValue(
                         primitive.width,

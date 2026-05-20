@@ -1,0 +1,229 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram id="diagram-module-class-diagram" name="Diagram module class diagram">
+    <mxGraphModel dx="2929" dy="718" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" value="src/modules/diagram — class/type diagram" vertex="1">
+          <mxGeometry height="50" width="720" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-model" parent="1" style="swimlane;html=1;rounded=0;whiteSpace=wrap;fillColor=#EAF4FF;strokeColor=#6BA5D7;fontStyle=1;fontSize=16;" value="model/types" vertex="1">
+          <mxGeometry height="610" width="930" x="40" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="EfgGOtu1BViA60xp3XZI-4" parent="pkg-model" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b style=&quot;text-align: left;&quot;&gt;I&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;DiagramNode&lt;/b&gt;&lt;/span&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ id: string&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ type: NodeType&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ x, y: number&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ width, height: number&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ rotation: number&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ label: string&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ customRendererId?: string&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ style: NodeStyle&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ textStyle: NodeTextStyle&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ notation?: NodeNotation&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ renderLabel?: boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ canStretch?: boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ preserveAspectRatio?: boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ edges: EdgeRef[]&lt;/p&gt;" vertex="1">
+          <mxGeometry height="250" width="190" x="50" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="EfgGOtu1BViA60xp3XZI-3" parent="pkg-model" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b style=&quot;text-align: left;&quot;&gt;I&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;DiagramDocument&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ nodes: DiagramNode[]&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ edges: DiagramEdge[]&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="190" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e-doc-node" edge="1" parent="pkg-model" source="EfgGOtu1BViA60xp3XZI-3" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeWidth=2;strokeColor=#6C8EBF;" target="EfgGOtu1BViA60xp3XZI-4" value="1..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EfgGOtu1BViA60xp3XZI-1" parent="pkg-model" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b style=&quot;text-align: left;&quot;&gt;IEdgePoint&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ x: number&lt;br&gt;+ y: number&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="190" x="80" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-store" parent="1" style="swimlane;html=1;rounded=0;whiteSpace=wrap;fillColor=#F1F8E9;strokeColor=#82B366;fontStyle=1;fontSize=16;" value="store" vertex="1">
+          <mxGeometry height="610" width="520" x="1000" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-runtime" parent="1" style="swimlane;html=1;rounded=0;whiteSpace=wrap;fillColor=#FFF8E1;strokeColor=#D6B656;fontStyle=1;fontSize=16;" value="model runtime: factories / registries / serializers / util" vertex="1">
+          <mxGeometry height="420" width="930" x="40" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-canvas" parent="1" style="swimlane;html=1;rounded=0;whiteSpace=wrap;fillColor=#FCE4EC;strokeColor=#B85450;fontStyle=1;fontSize=16;" value="canvas + ui" vertex="1">
+          <mxGeometry height="520" width="740" x="1000" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="NodeStyle" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;NodeStyle&lt;/b&gt;&lt;hr&gt;+ fill: string&lt;br&gt;+ stroke: string&lt;br&gt;+ strokeWidth: number&lt;br&gt;+ cornerRadius: number&lt;br&gt;+ opacity: number" vertex="1">
+          <mxGeometry height="130" width="240" x="400" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="NodeTextStyle" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;NodeTextStyle&lt;/b&gt;&lt;hr&gt;+ fill: string&lt;br&gt;+ fontSize: number&lt;br&gt;+ fontFamily: string&lt;br&gt;+ fontStyle: normal | italic&lt;br&gt;+ fontWeight: normal | bold&lt;br&gt;+ align: left | center | right" vertex="1">
+          <mxGeometry height="150" width="260" x="400" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="NodeNotation" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;NodeNotation&lt;/b&gt;&lt;hr&gt;+ id: string&lt;br&gt;+ name: string&lt;br&gt;+ svg?: string&lt;br&gt;+ primitives?: NodePrimitive[]&lt;br&gt;+ properties: NodeNotationProperty[]" vertex="1">
+          <mxGeometry height="130" width="250" x="690" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="NodePrimitive" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;NodePrimitive&lt;/b&gt;&lt;hr&gt;+ type: rect | circle | diamond | text | svg&lt;br&gt;+ x?, y?, width?, height?, radius?&lt;br&gt;+ fill?, stroke?, strokeWidth?&lt;br&gt;+ text?, textKey?&lt;br&gt;+ fontSize?, fontFamily?, align?&lt;br&gt;+ svg?: string" vertex="1">
+          <mxGeometry height="170" width="250" x="690" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="NodeNotationProperty" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;NodeNotationProperty&lt;/b&gt;&lt;hr&gt;+ name: string&lt;br&gt;+ label: string&lt;br&gt;+ type: text | number | color | select | boolean&lt;br&gt;+ value: string | number | boolean&lt;br&gt;+ options?: string[]&lt;br&gt;+ editable?: boolean" vertex="1">
+          <mxGeometry height="140" width="250" x="690" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="DiagramEdge" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;DiagramEdge&lt;/b&gt;&lt;hr&gt;+ id: string&lt;br&gt;+ source: EdgeAnchor&lt;br&gt;+ target: EdgeAnchor&lt;br&gt;+ type: straight | orthogonal | bezier&lt;br&gt;+ controlPoints: EdgePoint[]&lt;br&gt;+ style: EdgeStyle&lt;br&gt;+ label?: string&lt;br&gt;+ labelStyle?: EdgeLabelStyle" vertex="1">
+          <mxGeometry height="150" width="270" x="380" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="EdgeAnchor" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;spacingLeft=8;" value="&lt;b&gt;EdgeAnchor&lt;/b&gt;&lt;hr&gt;+ nodeId?: string&lt;br&gt;+ anchorId?: string&lt;br&gt;+ point: EdgePoint" vertex="1">
+          <mxGeometry height="90" width="230" x="390" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="EditorState" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;EditorState&lt;/b&gt;&lt;hr&gt;+ document: DiagramDocument&lt;br&gt;+ history: DocumentHistoryState&lt;br&gt;+ selection: SelectionState&lt;br&gt;+ viewport: ViewportState&lt;br&gt;+ interaction: InteractionState&lt;br&gt;+ actions: EditorActions" vertex="1">
+          <mxGeometry height="150" width="270" x="1030" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="EditorActions" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;EditorActions&lt;/b&gt;&lt;hr&gt;+ addNode(node)&lt;br&gt;+ updateNode(id, patch)&lt;br&gt;+ deleteNode(id)&lt;br&gt;+ addEdge(edge)&lt;br&gt;+ updateEdge(id, patch)&lt;br&gt;+ deleteEdge(id)&lt;br&gt;+ deleteSelection()&lt;br&gt;+ selectNode(id)&lt;br&gt;+ setViewport(x,y,zoom)&lt;br&gt;+ undo() / redo()" vertex="1">
+          <mxGeometry height="210" width="270" x="1030" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="DocumentHistoryState" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;DocumentHistoryState&lt;/b&gt;&lt;hr&gt;+ past: DiagramDocument[]&lt;br&gt;+ future: DiagramDocument[]" vertex="1">
+          <mxGeometry height="90" width="170" x="1330" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewportState" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;ViewportState&lt;/b&gt;&lt;hr&gt;+ x: number&lt;br&gt;+ y: number&lt;br&gt;+ zoom: number" vertex="1">
+          <mxGeometry height="90" width="170" x="1330" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="SelectionState" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;SelectionState&lt;/b&gt;&lt;hr&gt;+ ids: string[]" vertex="1">
+          <mxGeometry height="70" width="170" x="1330" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="InteractionState" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;spacingLeft=8;" value="&lt;b&gt;InteractionState&lt;/b&gt;&lt;hr&gt;+ dragging: boolean&lt;br&gt;+ nodeDragActive: boolean&lt;br&gt;+ edgeHandleDragActive: boolean&lt;br&gt;+ hoveredEdgeId?: string&lt;br&gt;+ anchorHighlightNodeId?: string&lt;br&gt;+ selectionBox?: ISelectionBox" vertex="1">
+          <mxGeometry height="160" width="170" x="1330" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="NotationDefinition" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;NotationDefinition&lt;/b&gt;&lt;hr&gt;+ type: NodeType&lt;br&gt;+ label: string&lt;br&gt;+ notation: NodeNotation&lt;br&gt;+ notationId: string&lt;br&gt;+ box: NotationBoxRules&lt;br&gt;+ renderLabel?: boolean" vertex="1">
+          <mxGeometry height="150" width="250" x="70" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="NodeDefinition" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;NodeDefinition&lt;/b&gt;&lt;hr&gt;+ type: NodeType&lt;br&gt;+ label: string&lt;br&gt;+ notation: NodeNotation&lt;br&gt;+ notationGroupId?: string&lt;br&gt;+ box: NotationBoxRules&lt;br&gt;+ renderLabel: boolean&lt;br&gt;+ customRendererId?: string" vertex="1">
+          <mxGeometry height="170" width="250" x="360" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="CreateNode" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;createNode(type, x, y)&lt;/b&gt;&lt;hr&gt;+ getNodeDefinition(type)&lt;br&gt;+ cloneNotation()&lt;br&gt;+ returns DiagramNode" vertex="1">
+          <mxGeometry height="110" width="260" x="650" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="CreateEdge" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;createEdge(source, target)&lt;/b&gt;&lt;hr&gt;+ returns DiagramEdge&lt;br&gt;+ default style&lt;br&gt;+ default endCap: arrow" vertex="1">
+          <mxGeometry height="100" width="260" x="650" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="DocumentSerializer" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;DocumentSerializer&lt;/b&gt;&lt;hr&gt;+ serialize(document): string&lt;br&gt;+ deserialize(raw): DiagramDocument&lt;br&gt;- normalizeNode(node)&lt;br&gt;- normalizeEdge(edge)" vertex="1">
+          <mxGeometry height="130" width="250" x="70" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="Registries" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;align=left;spacingLeft=8;" value="&lt;b&gt;Runtime registries&lt;/b&gt;&lt;hr&gt;+ nodeRegistry: Map&lt;nodeId, Konva.Group&gt;&lt;br&gt;+ edgeRegistry: Map&lt;edgeId, EdgeKonvaRefs&gt;&lt;br&gt;+ customRendererRegistry: Map&lt;id, CustomRenderer&gt;&lt;br&gt;+ rendererRegistry: RendererRegistry" vertex="1">
+          <mxGeometry height="130" width="250" x="360" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="DiagramEditor" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;DiagramEditor&lt;/b&gt;&lt;hr&gt;+ leftOpen/rightOpen&lt;br&gt;+ renders toolbar/sidebar/canvas/inspector" vertex="1">
+          <mxGeometry height="100" width="250" x="1030" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="DiagramCanvas" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;DiagramCanvas&lt;/b&gt;&lt;hr&gt;+ Stage refs&lt;br&gt;+ viewportRef&lt;br&gt;+ tempConnection&lt;br&gt;+ requestDraw(target)&lt;br&gt;+ startConnection()&lt;br&gt;+ finishConnection()&lt;br&gt;+ handleDrop()&lt;br&gt;+ handleWheel()" vertex="1">
+          <mxGeometry height="180" width="260" x="1320" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="DiagramSidebar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;DiagramSidebar&lt;/b&gt;&lt;hr&gt;+ items from nodeDefinitions&lt;br&gt;+ MiniNotation&lt;br&gt;+ createNodeInCenter(type)&lt;br&gt;+ drag data: diagram-node-type" vertex="1">
+          <mxGeometry height="120" width="250" x="1030" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="DiagramInspector" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;DiagramInspector&lt;/b&gt;&lt;hr&gt;+ NodeInspector&lt;br&gt;+ EdgeInspector&lt;br&gt;+ edits style/text/notation/points/caps" vertex="1">
+          <mxGeometry height="110" width="250" x="1030" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="ShapeRenderer" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;ShapeRenderer&lt;/b&gt;&lt;hr&gt;+ renders custom/svg/primitives&lt;br&gt;+ shows anchors&lt;br&gt;+ registers nodeRegistry&lt;br&gt;+ syncs related edges on drag&lt;br&gt;+ commits updateNode on dragEnd" vertex="1">
+          <mxGeometry height="140" width="260" x="1320" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="EdgeRenderer" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;EdgeRenderer&lt;/b&gt;&lt;hr&gt;+ resolveEdgePoints()&lt;br&gt;+ renders Line + Arrow caps&lt;br&gt;+ registers edgeRegistry&lt;br&gt;+ label at route midpoint&lt;br&gt;+ dblclick adds control point" vertex="1">
+          <mxGeometry height="180" width="110" x="1610" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="EdgeHandlesOverlay" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;align=left;spacingLeft=8;" value="&lt;b&gt;EdgeHandlesOverlay&lt;/b&gt;&lt;hr&gt;+ selected edge handles&lt;br&gt;+ drag endpoints&lt;br&gt;+ drag control points&lt;br&gt;+ snapEdgeEndpointToGraph()" vertex="1">
+          <mxGeometry height="110" width="260" x="1320" y="1160" as="geometry" />
+        </mxCell>
+        <mxCell id="e-doc-edge" edge="1" parent="1" source="EfgGOtu1BViA60xp3XZI-3" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeWidth=2;strokeColor=#6C8EBF;" target="DiagramEdge" value="1..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-node-style" edge="1" parent="1" source="EfgGOtu1BViA60xp3XZI-4" style="endArrow=open;html=1;rounded=0;dashed=1;strokeColor=#6C8EBF;" target="NodeStyle" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-node-text-style" edge="1" parent="1" source="EfgGOtu1BViA60xp3XZI-4" style="endArrow=open;html=1;rounded=0;dashed=1;strokeColor=#6C8EBF;" target="NodeTextStyle" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-node-notation" edge="1" parent="1" source="EfgGOtu1BViA60xp3XZI-4" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#6C8EBF;" target="NodeNotation" value="0..1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notation-primitive" edge="1" parent="1" source="NodeNotation" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#6C8EBF;" target="NodePrimitive" value="0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notation-prop" edge="1" parent="1" source="NodeNotation" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#6C8EBF;" target="NodeNotationProperty" value="1..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-edge-anchor-s" edge="1" parent="1" source="DiagramEdge" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#6C8EBF;" target="EdgeAnchor" value="source/target">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-edge-point" edge="1" parent="1" source="EdgeAnchor" style="endArrow=open;html=1;rounded=0;dashed=1;strokeColor=#6C8EBF;" target="EfgGOtu1BViA60xp3XZI-1" value="point">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-edge-control" edge="1" parent="1" source="DiagramEdge" style="endArrow=open;html=1;rounded=0;dashed=1;strokeColor=#6C8EBF;" target="EfgGOtu1BViA60xp3XZI-1" value="controlPoints">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-doc" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="EfgGOtu1BViA60xp3XZI-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-history" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="DocumentHistoryState" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-viewport" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="ViewportState" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-selection" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="SelectionState" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-interaction" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="InteractionState" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-state-actions" edge="1" parent="1" source="EditorState" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#82B366;" target="EditorActions" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notation-node-def" edge="1" parent="1" source="NotationDefinition" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="NodeDefinition" value="mapped into">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-node-def-notation" edge="1" parent="1" source="NodeDefinition" style="endArrow=open;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="NodeNotation" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-create-node-def" edge="1" parent="1" source="CreateNode" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="NodeDefinition" value="uses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-create-node" edge="1" parent="1" source="CreateNode" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="EfgGOtu1BViA60xp3XZI-4" value="returns">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-create-edge" edge="1" parent="1" source="CreateEdge" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="DiagramEdge" value="returns">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-serializer-doc" edge="1" parent="1" source="DocumentSerializer" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="EfgGOtu1BViA60xp3XZI-3" value="serialize/deserialize">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-registries-node" edge="1" parent="1" source="Registries" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="EfgGOtu1BViA60xp3XZI-4" value="refs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-registries-edge" edge="1" parent="1" source="Registries" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#D6B656;" target="DiagramEdge" value="refs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-editor-canvas" edge="1" parent="1" source="DiagramEditor" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="DiagramCanvas" value="contains">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-editor-sidebar" edge="1" parent="1" source="DiagramEditor" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="DiagramSidebar" value="contains">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-editor-inspector" edge="1" parent="1" source="DiagramEditor" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="DiagramInspector" value="contains">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-canvas-state" edge="1" parent="1" source="DiagramCanvas" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="EditorState" value="actions + viewport">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sidebar-create" edge="1" parent="1" source="DiagramSidebar" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="CreateNode" value="creates">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sidebar-defs" edge="1" parent="1" source="DiagramSidebar" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="NodeDefinition" value="reads">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-inspector-state" edge="1" parent="1" source="DiagramInspector" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="EditorActions" value="updates selected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-canvas-shape" edge="1" parent="1" source="DiagramCanvas" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="ShapeRenderer" value="renders nodes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-canvas-edge" edge="1" parent="1" source="DiagramCanvas" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="EdgeRenderer" value="renders edges">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-canvas-handles" edge="1" parent="1" source="DiagramCanvas" style="endArrow=diamondThin;endFill=1;html=1;rounded=0;strokeColor=#B85450;" target="EdgeHandlesOverlay" value="selected edge overlay">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-shape-node" edge="1" parent="1" source="ShapeRenderer" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="EfgGOtu1BViA60xp3XZI-4" value="renders">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-edge-renderer-edge" edge="1" parent="1" source="EdgeRenderer" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="DiagramEdge" value="renders">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-handles-edge" edge="1" parent="1" source="EdgeHandlesOverlay" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="DiagramEdge" value="edits">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-shape-anchors" edge="1" parent="1" source="ShapeRenderer" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#B85450;" target="EfgGOtu1BViA60xp3XZI-2" value="computes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EfgGOtu1BViA60xp3XZI-2" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b style=&quot;text-align: left;&quot;&gt;I&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;NodeAnchor&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+&amp;nbsp;id: top | right | bottom | left&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ x: number&lt;br&gt;+ y: number&lt;/p&gt;" vertex="1">
+          <mxGeometry height="100" width="190" x="-220" y="440" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

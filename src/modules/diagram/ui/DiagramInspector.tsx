@@ -1,5 +1,5 @@
 //ui/DiagramInspector
-import type {ReactNode} from 'react'
+import type { ReactNode } from 'react'
 import type {
     DiagramEdge,
     EdgePoint,
@@ -14,6 +14,7 @@ import {
     useSelectedEdge,
     useSelectedNode,
 } from '../store/selectors'
+import { useTranslation } from 'react-i18next'
 
 const fieldClass =
     'w-full border rounded-md px-3 py-2 text-sm bg-white h-min-6'
@@ -44,50 +45,10 @@ const PropertyField = ({
     children: ReactNode
 }) => (
     <label className='block'>
-        <span className={labelClass}>
-            {label}
-        </span>
+        <span className={labelClass}>{label}</span>
         {children}
     </label>
 )
-
-const DiagramInspector = () => {
-
-    const node =
-        useSelectedNode()
-
-    const edge =
-        useSelectedEdge()
-
-    const {
-        updateNode,
-        updateEdge,
-    } = useEditorActions()
-
-    if (edge) {
-        return (
-            <EdgeInspector
-                edge={edge}
-                updateEdge={updateEdge}
-            />
-        )
-    }
-
-    if (node) {
-        return (
-            <NodeInspector
-                node={node}
-                updateNode={updateNode}
-            />
-        )
-    }
-
-    return (
-        <div className='p-4 text-sm text-zinc-500'>
-            Ничего не выбрано
-        </div>
-    )
-}
 
 const NodeInspector = ({
     node,
@@ -96,6 +57,8 @@ const NodeInspector = ({
     node: DiagramNode
     updateNode: (id: string, updater: Partial<DiagramNode>) => void
 }) => {
+    const { t } = useTranslation('diagramEditor')
+
     const style: NodeStyle =
         Object.assign(
             {
@@ -124,12 +87,12 @@ const NodeInspector = ({
     return (
         <>
             <div className='p-3 border-b border-border font-semibold'>
-                Свойства блока
+                {t('inspector.node.properties')}
             </div>
 
             <div className='p-4 space-y-5 overflow-auto'>
-                <Section title='Контент'>
-                    <PropertyField label='Label'>
+                <Section title={t('inspector.node.content')}>
+                    <PropertyField label={t('inspector.node.label')}>
                         <input
                             value={node.label}
                             onChange={(e) =>
@@ -142,8 +105,8 @@ const NodeInspector = ({
                     </PropertyField>
                 </Section>
 
-                <Section title='Блок'>
-                    <PropertyField label='Заливка'>
+                <Section title={t('inspector.node.block')}>
+                    <PropertyField label={t('inspector.node.fill')}>
                         <input
                             type='color'
                             value={style.fill}
@@ -158,7 +121,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Контур'>
+                    <PropertyField label={t('inspector.node.stroke')}>
                         <input
                             type='color'
                             value={style.stroke}
@@ -173,7 +136,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Толщина контура'>
+                    <PropertyField label={t('inspector.node.cornerRadius')}>
                         <input
                             type='number'
                             min={0}
@@ -190,7 +153,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Скругление'>
+                    <PropertyField label={t('inspector.node.cornerRadius')}>
                         <input
                             type='number'
                             min={0}
@@ -208,8 +171,8 @@ const NodeInspector = ({
                     </PropertyField>
                 </Section>
 
-                <Section title='Текст'>
-                    <PropertyField label='Цвет'>
+                <Section title={t('inspector.node.text')}>
+                    <PropertyField label={t('inspector.node.textColor')}>
                         <input
                             type='color'
                             value={textStyle.fill}
@@ -224,7 +187,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Размер'>
+                    <PropertyField label={t('inspector.node.fontSize')}>
                         <input
                             type='number'
                             min={8}
@@ -241,7 +204,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Начертание'>
+                    <PropertyField label={t('inspector.node.font')}>
                         <select
                             value={`${textStyle.fontStyle}-${textStyle.fontWeight}`}
                             onChange={(e) => {
@@ -261,14 +224,22 @@ const NodeInspector = ({
                             }}
                             className={fieldClass}
                         >
-                            <option value='normal-normal'>Обычный</option>
-                            <option value='normal-bold'>Жирный</option>
-                            <option value='italic-normal'>Курсив</option>
-                            <option value='italic-bold'>Жирный курсив</option>
+                            <option value='normal-normal'>
+                                {t('inspector.node.fontStyle.normal')}
+                            </option>
+                            <option value='normal-bold'>
+                                {t('inspector.node.fontStyle.bold')}
+                            </option>
+                            <option value='italic-normal'>
+                                {t('inspector.node.fontStyle.italic')}
+                            </option>
+                            <option value='italic-bold'>
+                                {t('inspector.node.fontStyle.italicBold')}
+                            </option>
                         </select>
                     </PropertyField>
 
-                    <PropertyField label='Выравнивание'>
+                    <PropertyField label={t('inspector.node.align')}>
                         <select
                             value={textStyle.align}
                             onChange={(e) =>
@@ -281,16 +252,22 @@ const NodeInspector = ({
                             }
                             className={fieldClass}
                         >
-                            <option value='left'>Слева</option>
-                            <option value='center'>По центру</option>
-                            <option value='right'>Справа</option>
+                            <option value='left'>
+                                {t('inspector.node.alignment.left')}
+                            </option>
+                            <option value='center'>
+                                {t('inspector.node.alignment.center')}
+                            </option>
+                            <option value='right'>
+                                {t('inspector.node.alignment.right')}
+                            </option>
                         </select>
                     </PropertyField>
                 </Section>
 
                 {node.notation && (
-                    <Section title='Нотация'>
-                        <PropertyField label='Тип'>
+                    <Section title={t('inspector.node.notation')}>
+                        <PropertyField label={t('inspector.node.type')}>
                             <input
                                 value={node.notation.name}
                                 readOnly
@@ -298,7 +275,7 @@ const NodeInspector = ({
                             />
                         </PropertyField>
 
-                        {node.notation.properties.map(property => (
+                        {node.notation.properties.map((property) => (
                             <PropertyField
                                 key={property.name}
                                 label={property.label}
@@ -315,13 +292,13 @@ const NodeInspector = ({
                                                 notation: {
                                                     ...node.notation!,
                                                     properties:
-                                                        node.notation!.properties.map(item =>
+                                                        node.notation!.properties.map((item) =>
                                                             item.name === property.name
                                                                 ? {
                                                                     ...item,
                                                                     value: e.target.value,
                                                                 }
-                                                                : item
+                                                                : item,
                                                         ),
                                                 },
                                             })
@@ -346,6 +323,8 @@ const EdgeInspector = ({
     edge: DiagramEdge
     updateEdge: (id: string, updater: Partial<DiagramEdge>) => void
 }) => {
+    const { t } = useTranslation('diagramEditor')
+
     const updateControlPoint = (
         index: number,
         point: Partial<EdgePoint>,
@@ -358,7 +337,7 @@ const EdgeInspector = ({
                             ...current,
                             ...point,
                         }
-                        : current
+                        : current,
             ),
         })
     }
@@ -377,12 +356,12 @@ const EdgeInspector = ({
     return (
         <>
             <div className='p-3 border-b border-border font-semibold'>
-                Свойства связи
+                {t('inspector.edge.properties')}
             </div>
 
             <div className='p-4 space-y-5 overflow-auto'>
-                <Section title='Контент'>
-                    <PropertyField label='Label'>
+                <Section title={t('inspector.edge.content')}>
+                    <PropertyField label={t('inspector.edge.label')}>
                         <input
                             value={edge.label ?? ''}
                             onChange={(e) =>
@@ -395,8 +374,8 @@ const EdgeInspector = ({
                     </PropertyField>
                 </Section>
 
-                <Section title='Текст'>
-                    <PropertyField label='Цвет'>
+                <Section title={t('inspector.edge.text')}>
+                    <PropertyField label={t('inspector.edge.color')}>
                         <input
                             type='color'
                             value={labelStyle.fill}
@@ -411,7 +390,7 @@ const EdgeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Размер'>
+                    <PropertyField label={t('inspector.edge.fontSize')}>
                         <input
                             type='number'
                             min={8}
@@ -429,8 +408,8 @@ const EdgeInspector = ({
                     </PropertyField>
                 </Section>
 
-                <Section title='Линия'>
-                    <PropertyField label='Тип'>
+                <Section title={t('inspector.edge.line')}>
+                    <PropertyField label={t('inspector.edge.lineType')}>
                         <select
                             value={edge.type}
                             onChange={(e) =>
@@ -440,13 +419,19 @@ const EdgeInspector = ({
                             }
                             className={fieldClass}
                         >
-                            <option value='straight'>Прямая</option>
-                            <option value='orthogonal'>Ломаная</option>
-                            <option value='bezier'>Bezier</option>
+                            <option value='straight'>
+                                {t('inspector.edge.straight')}
+                            </option>
+                            <option value='orthogonal'>
+                                {t('inspector.edge.orthogonal')}
+                            </option>
+                            <option value='bezier'>
+                                {t('inspector.edge.bezier')}
+                            </option>
                         </select>
                     </PropertyField>
 
-                    <PropertyField label='Цвет'>
+                    <PropertyField label={t('inspector.edge.color')}>
                         <input
                             type='color'
                             value={edge.style.stroke}
@@ -461,7 +446,7 @@ const EdgeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label='Толщина'>
+                    <PropertyField label={t('inspector.edge.fontSize')}>
                         <input
                             type='number'
                             min={1}
@@ -479,8 +464,8 @@ const EdgeInspector = ({
                     </PropertyField>
                 </Section>
 
-                <Section title='Концы'>
-                    <PropertyField label='Начало линии'>
+                <Section title={t('inspector.edge.caps')}>
+                    <PropertyField label={t('inspector.edge.start')}>
                         <select
                             value={edge.style.startCap ?? 'none'}
                             onChange={(e) =>
@@ -493,12 +478,16 @@ const EdgeInspector = ({
                             }
                             className={fieldClass}
                         >
-                            <option value='none'>Линия</option>
-                            <option value='arrow'>Стрелка</option>
+                            <option value='none'>
+                                {t('inspector.edge.none')}
+                            </option>
+                            <option value='arrow'>
+                                {t('inspector.edge.arrow')}
+                            </option>
                         </select>
                     </PropertyField>
 
-                    <PropertyField label='Конец линии'>
+                    <PropertyField label={t('inspector.edge.end')}>
                         <select
                             value={edge.style.endCap ?? 'arrow'}
                             onChange={(e) =>
@@ -511,13 +500,17 @@ const EdgeInspector = ({
                             }
                             className={fieldClass}
                         >
-                            <option value='none'>Линия</option>
-                            <option value='arrow'>Стрелка</option>
+                            <option value='none'>
+                                {t('inspector.edge.none')}
+                            </option>
+                            <option value='arrow'>
+                                {t('inspector.edge.arrow')}
+                            </option>
                         </select>
                     </PropertyField>
                 </Section>
 
-                <Section title='Точки перегиба'>
+                <Section title={t('inspector.edge.points')}>
                     <button
                         type='button'
                         className='w-full border rounded-md px-3 py-2 text-sm hover:bg-zinc-100'
@@ -527,20 +520,14 @@ const EdgeInspector = ({
                                 controlPoints: [
                                     ...edge.controlPoints,
                                     {
-                                        x: (
-                                            edge.source.point.x +
-                                            edge.target.point.x
-                                        ) / 2,
-                                        y: (
-                                            edge.source.point.y +
-                                            edge.target.point.y
-                                        ) / 2,
+                                        x: (edge.source.point.x + edge.target.point.x) / 2,
+                                        y: (edge.source.point.y + edge.target.point.y) / 2,
                                     },
                                 ],
                             })
                         }
                     >
-                        Добавить точку
+                        {t('inspector.edge.addPoint')}
                     </button>
 
                     {edge.controlPoints.map((point, index) => (
@@ -576,7 +563,7 @@ const EdgeInspector = ({
                                         controlPoints:
                                             edge.controlPoints.filter(
                                                 (_, currentIndex) =>
-                                                    currentIndex !== index
+                                                    currentIndex !== index,
                                             ),
                                     })
                                 }
@@ -591,6 +578,28 @@ const EdgeInspector = ({
     )
 }
 
-export {
-    DiagramInspector
+const DiagramInspector = () => {
+    const { t } = useTranslation('diagramEditor')
+
+    const node = useSelectedNode()
+    const edge = useSelectedEdge()
+
+    const { updateNode, updateEdge } = useEditorActions()
+
+    if (edge) {
+        return <EdgeInspector edge={edge} updateEdge={updateEdge} />
+    }
+
+    if (node) {
+        return <NodeInspector node={node} updateNode={updateNode} />
+    }
+
+    return (
+        <div className='p-4 text-sm text-zinc-500'>
+            {t('inspector.noneSelected')}
+        </div>
+    )
 }
+
+export { DiagramInspector }
+

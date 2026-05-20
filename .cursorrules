@@ -1,0 +1,42 @@
+# General
+
+- production-ready code only
+- strict TypeScript
+- avoid any
+- prefer explicit typing
+- prefer composition over inheritance
+- avoid giant files and hooks
+
+# Naming
+
+- interfaces start with I
+- enums start with E
+- global constants use UPPER_CASE
+
+# React
+
+- functional components only
+- named exports only
+- business logic outside JSX
+
+# Architecture
+
+- project uses FSD architecture
+- src/modules is isolated from FSD
+- modules may have custom internal architecture
+- modules should be portable to separate libraries
+
+# State
+
+- Zustand for global state
+- TanStack Query for server state
+
+# Styling
+
+- Tailwind CSS
+- clsx/cva for complex variants
+
+# Imports
+
+- use public API
+- avoid deep imports

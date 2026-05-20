@@ -14,12 +14,13 @@ interface NodeTextStyle {
     align: 'left' | 'center' | 'right'
 }
 
+// Style properties for a node (rectangle, circle, diamond, etc.)
 interface NodeStyle {
-    fill: string
-    stroke: string
-    strokeWidth: number
-    cornerRadius: number
-    opacity: number
+    fill: string       // Fill color of the node
+    stroke: string     // Stroke (outline) color
+    strokeWidth: number // Width of the stroke in pixels
+    cornerRadius: number // Radius for rounded corners (rectangle only)
+    opacity: number    // Node opacity (0 = fully transparent, 1 = fully opaque)
 }
 
 interface NodeNotationProperty {
@@ -68,6 +69,11 @@ interface DiagramNode {
     x: number
     y: number
 
+    /**
+     * Если задан — используется кастомный рендерер из canvas/RendererRegistry
+     * (работает поверх стандартного primitive/svg рендера).
+     */
+    customRendererId?: string
     width: number
     height: number
 

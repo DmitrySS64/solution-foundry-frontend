@@ -11,8 +11,10 @@ import {
 
 import { useEditorStore } from '../store/editor.store'
 
+import { useTranslation } from 'react-i18next'
 
 const DiagramToolbar = () => {
+    const { t } = useTranslation('diagramEditor')
     const { addNode, undo, redo } = useEditorActions()
     const viewport = useViewport()
 
@@ -21,9 +23,8 @@ const DiagramToolbar = () => {
 
     const futureLen = useEditorStore(s => s.history.future.length)
 
-
-
     return (
+
         <div className="flex w-full px-4 items-center gap-2">
             <div className="w-px h-6 bg-border mx-1" />
             <IconButton
@@ -31,14 +32,14 @@ const DiagramToolbar = () => {
                 path={ICON_PATHS.UNDO}
                 onClick={undo}
                 disabled={pastLen === 0}
-                title="Undo (Ctrl+Z)"
+                title={t('toolbar.undo')}
             />
             <IconButton
                 padding
                 path={ICON_PATHS.REDO}
                 onClick={redo}
                 disabled={futureLen === 0}
-                title="Redo (Ctrl+Y)"
+                title={t('toolbar.redo')}
             />
             <div className="w-px h-6 bg-border mx-1" />
 
@@ -54,7 +55,7 @@ const DiagramToolbar = () => {
                         ),
                     )
                 }}
-                title="Add rectangle"
+                title={t('toolbar.addRectangle')}
             />
         </div>
     )

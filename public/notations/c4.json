@@ -1,0 +1,102 @@
+{
+  "id": "c4",
+  "name": "C4",
+  "version": "1.0",
+  "elements": [
+    {
+      "type": "c4-person",
+      "name": "Person",
+      "extends": "shape",
+      "icon": "mdiAccount",
+      "defaults": {
+        "shapeType": "circle",
+        "width": 90,
+        "height": 90,
+        "style": {
+          "fill": "#F3E8FF",
+          "stroke": "#9333EA",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Name", "type": "text", "default": "User" },
+        {
+          "name": "description",
+          "label": "Description",
+          "type": "text",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "c4-container",
+      "name": "Container",
+      "extends": "shape",
+      "icon": "mdiCube",
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 200,
+        "height": 110,
+        "style": {
+          "fill": "#FEF3C7",
+          "stroke": "#F59E0B",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Name", "type": "text", "default": "Container" },
+        {
+          "name": "technology",
+          "label": "Technology",
+          "type": "text",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "c4-deployment",
+      "name": "Deployment",
+      "extends": "shape",
+      "icon": "mdiServer",
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 220,
+        "height": 120,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#2563EB",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Name", "type": "text", "default": "Deployment" },
+        {
+          "name": "technology",
+          "label": "Technology",
+          "type": "text",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "c4-relationship",
+      "name": "Relationship",
+      "extends": "edge",
+      "icon": "mdiArrowRight",
+      "defaults": {
+        "style": {
+          "stroke": "#475569",
+          "strokeWidth": 2
+        },
+        "endCap": "arrow"
+      },
+      "properties": [
+        { "name": "label", "label": "Label", "type": "text", "default": "" }
+      ]
+    }
+  ]
+}
+

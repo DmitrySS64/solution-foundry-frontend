@@ -1,0 +1,92 @@
+{
+  "id": "uml",
+  "name": "UML",
+  "version": "1.0",
+  "elements": [
+    {
+      "type": "uml-class",
+      "name": "Class",
+      "extends": "shape",
+      "icon": "mdiAccountBoxOutline",
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 180,
+        "height": 100,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Name", "type": "text", "default": "Class" },
+        {
+          "name": "stereotype",
+          "label": "Stereotype",
+          "type": "text",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "uml-interface",
+      "name": "Interface",
+      "extends": "shape",
+      "icon": "mdiCardAccountDetailsOutline",
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 180,
+        "height": 90,
+        "style": {
+          "fill": "#E0F2FE",
+          "stroke": "#0284C7",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Name", "type": "text", "default": "Interface" },
+        {
+          "name": "stereotype",
+          "label": "Stereotype",
+          "type": "text",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "uml-association",
+      "name": "Association",
+      "extends": "edge",
+      "icon": "mdiLink",
+      "defaults": {
+        "style": {
+          "stroke": "#475569",
+          "strokeWidth": 2
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Label", "type": "text", "default": "" }
+      ]
+    },
+    {
+      "type": "uml-inheritance",
+      "name": "Inheritance",
+      "extends": "edge",
+      "icon": "mdiArrowUpBoldOutline",
+      "defaults": {
+        "style": {
+          "stroke": "#475569",
+          "strokeWidth": 2,
+          "dash": [6, 4]
+        },
+        "endCap": "arrow"
+      },
+      "properties": [
+        { "name": "label", "label": "Label", "type": "text", "default": "" }
+      ]
+    }
+  ]
+}
+

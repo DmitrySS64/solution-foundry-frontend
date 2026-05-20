@@ -21,6 +21,8 @@ import {useEditorStore} from "../store/editor.store.ts";
 import type {DiagramEdge, TempEdge} from "../model/types";
 import {getNodeAnchors} from "@/modules/diagram/model/factories/getNodeAnchors.ts";
 import {closestPointOnRectPerimeter} from "@/modules/diagram/model/util/edgeGeometry.ts";
+import { createNode } from "../model/factories/create-node";
+
 
 const DiagramCanvas = () => {
     const {
@@ -290,7 +292,6 @@ const DiagramCanvas = () => {
     }
 
     const cancelConnection = () => {
-
         isConnecting.current = false
 
         tempConnection.current.active = false
@@ -543,9 +544,34 @@ const DiagramCanvas = () => {
     }, [deleteSelection, pastLen, futureLen, undo, redo])
 
 
+    // DRAG & DROP FROM SIDEBAR
+    const handleDragOver = (e: Konva.KonvaEventObject<DragEvent>) => {
+        e.evt.preventDefault();
+        e.evt.dataTransfer && (e.evt.dataTransfer.dropEffect = 'copy');
+    }
+
+    const handleDrop = (e: Konva.KonvaEventObject<DragEvent>) => {
+        e.evt.preventDefault();
+
+        const type = e.evt.dataTransfer?.getData('application/diagram-node-type');
+        if (!type) return;
+
+        const stage = stageRef.current;
+        if (!stage) return;
+
+        const pointer = stage.getPointerPosition();
+        if (!pointer) return;
+
+        const worldX = (pointer.x - viewportRef.current.x) / viewportRef.current.zoom;
+        const worldY = (pointer.y - viewportRef.current.y) / viewportRef.current.zoom;
+
+        useEditorStore.getState().actions.addNode(createNode(type, worldX, worldY));
+    }
+
     // RENDER
     return (
         <Stage
+            
             ref={stageRef}
 
             width={window.innerWidth}
@@ -555,6 +581,8 @@ const DiagramCanvas = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onWheel={handleWheel}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
         >
             {/*GRID*/}
             <Layer ref={gridLayerRef}>

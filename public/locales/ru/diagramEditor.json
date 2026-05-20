@@ -1,4 +1,72 @@
 {
+  "toolbar": {
+    "undo": "Отменить (Ctrl+Z)",
+    "redo": "Вернуть (Ctrl+Y)",
+    "addRectangle": "Добавить прямоугольник"
+  },
+  "sidebar": {
+    "library": "Библиотека",
+    "group": {
+      "bpmn": "BPMN",
+      "uml": "UML",
+      "c4": "C4",
+      "base": "База"
+    }
+  },
+  "inspector": {
+    "noneSelected": "Ничего не выбрано",
+    "node": {
+      "properties": "Свойства блока",
+      "content": "Контент",
+      "label": "Label",
+      "block": "Блок",
+      "fill": "Заливка",
+      "stroke": "Контур",
+      "cornerRadius": "Скругление",
+      "text": "Текст",
+      "textColor": "Цвет текста",
+      "fontSize": "Размер",
+      "font": "Шрифт",
+      "fontStyle": {
+        "normal": "Обычный",
+        "bold": "Жирный",
+        "italic": "Курсив",
+        "italicBold": "Жирный курсив"
+      },
+      "align": "Выравнивание",
+      "alignment": {
+        "left": "Слева",
+        "center": "По центру",
+        "right": "Справа"
+      },
+      "notation": "Нотация",
+      "type": "Тип",
+      "addTag": "Добавить точку",
+      "tag": "Tag",
+      "string": "String"
+    },
+    "edge": {
+      "properties": "Свойства связи",
+      "content": "Контент",
+      "label": "Label",
+      "text": "Текст",
+      "color": "Цвет",
+      "fontSize": "Размер",
+      "line": "Линия",
+      "lineType": "Тип",
+      "straight": "Прямая",
+      "orthogonal": "Ломаная",
+      "bezier": "Bezier",
+      "caps": "Концы",
+      "start": "Начало линии",
+      "end": "Конец линии",
+      "none": "Линия",
+      "arrow": "Стрелка",
+      "points": "Точки перереба",
+      "addPoint": "Добавить точку"
+    }
+  },
   "Unsaved": "Несохраненные изменения",
   "title": "Редактор нотаций"
 }
+

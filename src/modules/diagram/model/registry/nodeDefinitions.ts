@@ -18,7 +18,11 @@ interface NodeDefinition {
     notationGroupId?: string
     box: NotationBoxRules
     renderLabel: boolean
+
+    // п.4: можно указать кастомный рендер для конкретного типа ноды
+    customRendererId?: string
 }
+
 
 
 const defaultProperties = [

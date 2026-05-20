@@ -23,6 +23,10 @@ export const createNode = (
         height: definition?.box?.initialHeight ?? 80,
         rotation: 0,
         label: 'Node',
+        ...(definition?.customRendererId
+            ? { customRendererId: definition.customRendererId }
+            : {}),
+
         style: {
             fill: '#DBEAFE',
             stroke: '#3B82F6',

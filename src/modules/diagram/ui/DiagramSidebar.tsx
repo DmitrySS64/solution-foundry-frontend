@@ -3,6 +3,7 @@ import type { NodeType } from "@/modules/diagram/model/types/node.types.ts";
 import { createNode } from "../model/factories/create-node";
 import { nodeDefinitions } from "@/modules/diagram/model/registry/nodeDefinitions.ts";
 import { useEditorActions, useViewport } from "../store/selectors";
+import { useTranslation } from 'react-i18next';
 
 type SidebarItem = {
     type: NodeType;
@@ -10,17 +11,21 @@ type SidebarItem = {
     notationGroupId: string;
 };
 
+
 const items: SidebarItem[] = nodeDefinitions.map(definition => ({
     type: definition.type,
     label: definition.label,
     notationGroupId: definition.notationGroupId ?? 'base',
 }));
 
-const groupName = (groupId: string) => {
-    if (groupId === 'bpmn') return 'BPMN';
-    if (groupId === 'c4') return 'C4';
-    return 'База';
+const groupName = (groupId: string, t: (key: string) => string) => {
+    if (groupId === 'bpmn') return t('sidebar.group.bpmn');
+    if (groupId === 'uml') return t('sidebar.group.uml');
+    if (groupId === 'c4') return t('sidebar.group.c4');
+    return t('sidebar.group.base');
 };
+
+
 
 const MiniNotation = ({
     notation,
@@ -240,6 +245,7 @@ const MiniNotation = ({
 };
 
 const DiagramSidebar = () => {
+    const { t } = useTranslation('diagramEditor');
     const { addNode } = useEditorActions();
     const viewport = useViewport();
 
@@ -254,12 +260,14 @@ const DiagramSidebar = () => {
 
     return (
         <>
-            <div className='p-3 border-b border-border font-semibold'>Library</div>
+            <div className='p-3 border-b border-border font-semibold'>{t('sidebar.library')}</div>
+
             <div className='flex-1 overflow-auto p-3'>
                 {Object.entries(
                     items.reduce(
                         (acc, item) => {
-                            const key = groupName(item.notationGroupId);
+                            const key = groupName(item.notationGroupId, t);
+
                             (acc[key] ??= []).push(item);
                             return acc;
                         },
@@ -278,7 +286,12 @@ const DiagramSidebar = () => {
                                     <button
                                         key={item.type}
                                         type='button'
-                                        className='rounded-lg border border-border hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2'
+                                        draggable
+                                        onDragStart={(e) => {
+                                            e.dataTransfer?.setData('application/diagram-node-type', item.type);
+                                            e.dataTransfer && (e.dataTransfer.effectAllowed = 'copy');
+                                        }}
+                                        className='rounded-lg border border-border hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 cursor-grab'
                                         onClick={() => createNodeInCenter(item.type)}
                                     >
                                         <MiniNotation notation={def?.notation} />
@@ -286,6 +299,7 @@ const DiagramSidebar = () => {
                                             {item.label}
                                         </div>
                                     </button>
+
                                 );
                             })}
                         </div>
