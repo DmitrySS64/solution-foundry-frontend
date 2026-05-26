@@ -7,118 +7,101 @@ import {ProjectHeader} from "@shared/ui/project_page/header/component";
 import {useDocument, useEditorActions} from "@/modules/diagram/store/selectors.ts";
 import {DocumentSerializer} from "@/modules/diagram/model/serializers/document.serializer.ts";
 import {useTranslation} from "react-i18next";
-
-// Ключ для localStorage
-const STORAGE_KEY = 'diagram-document';
+import { useParams } from '@tanstack/react-router';
 
 const DiagramPage = () => {
-    const {t} = useTranslation('diagramEditor');
+    const { t } = useTranslation('diagramEditor');
+    const { id: documentId } = useParams({ strict: false });
 
-    const document =
-        useDocument()
-
-    const {
-        loadDocument,
-    } = useEditorActions()
-
+    const document = useDocument();
+    const { loadDocument } = useEditorActions();
     const [saved, setSaved] = useState(true);
 
-    // LOAD
+    // Generate a stable document ID from URL param or fallback
+    const effectiveDocId = documentId || 'untitled';
+
+    // Load from fake REST API
     useEffect(() => {
-
-        const raw =
-            localStorage.getItem(STORAGE_KEY)
-
-        if (!raw) return
-
-        try {
-
-            const document =
-                DocumentSerializer.deserialize(raw)
-
-            loadDocument(document)
-
-        } catch (error) {
-
-            console.error(
-                'Failed to load document',
-                error
-            )
-        }
-
-    }, [loadDocument])
-
-    // AUTOSAVE
-    useEffect(() => {
-
-        setSaved(false)
-
-        const timeout = setTimeout(() => {
-
-            localStorage.setItem(
-                STORAGE_KEY,
-                DocumentSerializer.serialize(document)
-            )
-
-            setSaved(true)
-
-        }, 1000)
-
-        return () => clearTimeout(timeout)
-
-    }, [document])
-
-    // SAVE
-    const handleSave = () => {
-
-        localStorage.setItem(
-            STORAGE_KEY,
-            DocumentSerializer.serialize(document)
-        )
-
-        setSaved(true)
-    }
-
-    // EXPORT
-    const handleExport = () => {
-
-        const json =
-            DocumentSerializer.serialize(document)
-
-        const blob =
-            new Blob(
-                [json],
-                {
-                    type: 'application/json',
+        const apiUrl = `/api/diagrams/${encodeURIComponent(effectiveDocId)}`;
+        fetch(apiUrl)
+            .then(res => {
+                if (res.ok) return res.json();
+                // Try localStorage as fallback for backwards compatibility
+                const raw = localStorage.getItem('diagram-document');
+                if (raw) return DocumentSerializer.deserialize(raw);
+                return null;
+            })
+            .then(doc => {
+                if (doc) loadDocument(doc);
+            })
+            .catch(() => {
+                // Fallback to localStorage
+                try {
+                    const raw = localStorage.getItem('diagram-document');
+                    if (raw) {
+                        loadDocument(DocumentSerializer.deserialize(raw));
+                    }
+                } catch (error) {
+                    console.error('Failed to load document', error);
                 }
-            )
+            });
+    }, [loadDocument, effectiveDocId]);
 
-        const url =
-            URL.createObjectURL(blob)
+    // Autosave to fake REST API
+    useEffect(() => {
+        setSaved(false);
+        const timeout = setTimeout(async () => {
+            try {
+                await fetch(`/api/diagrams/${encodeURIComponent(effectiveDocId)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: DocumentSerializer.serialize(document),
+                });
+            } catch (error) {
+                console.error('Failed to save document', error);
+            }
+            setSaved(true);
+        }, 1000);
+        return () => clearTimeout(timeout);
+    }, [document, effectiveDocId]);
 
-        const link =
-            window.document.createElement('a')
+    const handleSave = async () => {
+        try {
+            await fetch(`/api/diagrams/${encodeURIComponent(effectiveDocId)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: DocumentSerializer.serialize(document),
+            });
+            setSaved(true);
+        } catch (error) {
+            console.error('Failed to save', error);
+        }
+    };
 
-        link.href = url
-
-        link.download =
-            `diagram-${Date.now()}.json`
-
-        link.click()
-
-        URL.revokeObjectURL(url)
-    }
+    const handleExport = () => {
+        const json = DocumentSerializer.serialize(document);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = window.document.createElement('a');
+        link.href = url;
+        link.download = `diagram-${effectiveDocId}-${Date.now()}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div className="h-[calc(100vh - 56px)] text-black overflow-hidden">
             <ProjectHeader>
                 <div className="flex items-center justify-between w-full">
                     <h1 className="text-2xl font-bold">{t('title')}</h1>
-                    {!saved && (
-                        <div className="text-sm text-yellow-600 mb-2">
-                            {t('Unsaved')}
-                        </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {!saved && (
+                            <div className="text-sm text-yellow-600">
+                                {t('Unsaved')}
+                            </div>
+                        )}
+                        <span className="text-xs text-gray-400 font-mono">ID: {effectiveDocId}</span>
+                    </div>
                     <div className="flex items-center gap-4">
                         <Button
                             onClick={handleSave}
@@ -141,7 +124,7 @@ const DiagramPage = () => {
                 </div>
             </ProjectHeader>
             <div className={'h-[calc(100vh-162px)] overflow-hidden'}>
-                <DiagramEditor />
+                <DiagramEditor documentId={effectiveDocId} />
             </div>
         </div>
     );

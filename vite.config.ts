@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { visualizer } from 'rollup-plugin-visualizer';
+import { fakeDiagramApiPlugin } from './src/shared/api/vite-middleware';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,6 +12,7 @@ export default defineConfig({
   plugins: [
       react(),
       tailwindcss(),
+      fakeDiagramApiPlugin(),
       visualizer({
         filename: path.resolve(__dirname, 'dist/stats.html'),
         open: false,

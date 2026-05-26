@@ -3,10 +3,10 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { $getSelection, $isRangeSelection } from "lexical";
 import {
     $getTableCellNodeFromLexicalNode,
-    $insertTableRowAtSelection,
-    $insertTableColumnAtSelection,
-    $deleteTableRowAtSelection,
-    $deleteTableColumnAtSelection,
+    //$insertTableRowAtSelection,
+    //$insertTableColumnAtSelection,
+    //$deleteTableRowAtSelection,
+    //$deleteTableColumnAtSelection,
 } from "@lexical/table";
 import {Button} from "@shared/ui/form/button";
 
@@ -34,7 +34,7 @@ export const TableToolbarPlugin = () => {
             if (!cellNode) return;
 
             // Вставляем строку после текущей
-            $insertTableRowAtSelection(true);
+            //$insertTableRowAtSelection(true);
         });
     };
 
@@ -47,19 +47,19 @@ export const TableToolbarPlugin = () => {
             if (!cellNode) return;
 
             // Вставляем колонку после текущей
-            $insertTableColumnAtSelection(true);
+            //$insertTableColumnAtSelection(true);
         });
     };
 
     const handleDeleteRow = () => {
         editor.update(() => {
-            $deleteTableRowAtSelection();
+            //$deleteTableRowAtSelection();
         });
     };
 
     const handleDeleteColumn = () => {
         editor.update(() => {
-            $deleteTableColumnAtSelection();
+            //$deleteTableColumnAtSelection();
         });
     };
 

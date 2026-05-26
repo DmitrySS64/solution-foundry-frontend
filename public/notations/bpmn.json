@@ -4,14 +4,17 @@
   "version": "1.0",
   "elements": [
     {
-      "type": "bpmn-task",
+      "type": "task",
       "name": "Задача",
       "extends": "shape",
       "icon": "mdiSquare",
+      "preview": "/notations/bpmn/task.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
       "defaults": {
         "shapeType": "rectangle",
-        "width": 140,
-        "height": 70,
+        "width": 90,
+        "height": 110,
         "style": {
           "fill": "#DBEAFE",
           "stroke": "#3B82F6",
@@ -20,74 +23,278 @@
         }
       },
       "properties": [
-        { "name": "label", "label": "Название", "type": "text", "default": "Новая задача" },
-        { "name": "taskType", "label": "Тип задачи", "type": "select",
-          "options": ["user", "service", "script", "businessRule"],
-          "default": "user" },
-        { "name": "isAsync", "label": "Асинхронная", "type": "boolean", "default": false }
+        { "name": "label", "label": "Название", "type": "text", "default": "Задача" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/task.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
       ]
     },
     {
-      "type": "bpmn-gateway",
+      "type": "start-event",
+      "name": "Начальное событие",
+      "extends": "shape",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/start-event.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "Начальное событие" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/start-event.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "type": "intermediate-event",
+      "name": "Промежуточное событие",
+      "extends": "shape",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/intermediate-event.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "Конец" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/intermediate-event.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "type": "bpmn-end-event",
+      "name": "Конец события",
+      "extends": "shape",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/end-event.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "Конец" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/end-event.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "type": "event-subprocess-expanded",
+      "name": "Подпроцесс",
+      "extends": "shape",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/event-subprocess-expanded.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
+      "defaults": {
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
+        "style": {
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
+        }
+      },
+      "properties": [
+        { "name": "label", "label": "Название", "type": "text", "default": "Подпроцесс" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/event-subprocess-expanded.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "type": "gateway",
       "name": "Шлюз",
       "extends": "shape",
-      "icon": "mdiRhombus",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/gateway.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
       "defaults": {
-        "shapeType": "diamond",
-        "width": 80,
-        "height": 80,
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
         "style": {
-          "fill": "#FEF3C7",
-          "stroke": "#F59E0B"
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
         }
       },
       "properties": [
-        { "name": "label", "label": "Название", "type": "text", "default": "" },
-        { "name": "gatewayType", "label": "Тип шлюза", "type": "select",
-          "options": ["exclusive", "parallel", "inclusive", "event"],
-          "default": "exclusive" }
+        { "name": "label", "label": "Название", "type": "text", "default": "Шлюз" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/gateway.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
+        }
       ]
     },
     {
-      "type": "bpmn-event",
-      "name": "Событие",
+      "type": "group",
+      "name": "Группа",
       "extends": "shape",
-      "icon": "mdiCircle",
+      "icon": "mdiSquare",
+      "preview": "/notations/bpmn/group.svg",
+      "renderLabel": false,
+      "textOutsideGroup": true,
       "defaults": {
-        "shapeType": "circle",
-        "width": 60,
-        "height": 60,
+        "shapeType": "rectangle",
+        "width": 90,
+        "height": 110,
         "style": {
-          "fill": "#F3E8FF",
-          "stroke": "#9333EA"
+          "fill": "#DBEAFE",
+          "stroke": "#3B82F6",
+          "strokeWidth": 2,
+          "opacity": 1
         }
       },
       "properties": [
-        { "name": "label", "label": "Название", "type": "text", "default": "" },
-        { "name": "eventType", "label": "Тип события", "type": "select",
-          "options": ["start", "intermediate", "end"],
-          "default": "intermediate" }
-      ]
-    },
-    {
-      "type": "bpmn-pool",
-      "name": "Пул",
-      "extends": "zone",
-      "icon": "mdiShape",
-      "defaults": {
-        "width": 600,
-        "height": 200,
-        "style": {
-          "fill": "transparent",
-          "stroke": "#475569",
-          "strokeWidth": 2
+        { "name": "label", "label": "Название", "type": "text", "default": "Конец" }
+      ],
+      "primitives": [
+        {
+          "type": "svg",
+          "x": 0.18,
+          "y": 0.05,
+          "width": 0.64,
+          "height": 0.45,
+          "src": "/notations/bpmn/end-event.svg"
+        },
+        {
+          "type": "text",
+          "textKey": "label",
+          "x": 0,
+          "y": 0.6,
+          "width": 1,
+          "height": 0.3,
+          "align": "center"
         }
-      },
-      "properties": [
-        { "name": "label", "label": "Название пула", "type": "text", "default": "Пул" },
-        { "name": "orientation", "label": "Ориентация", "type": "select",
-          "options": ["horizontal", "vertical"],
-          "default": "horizontal" }
       ]
     }
   ],

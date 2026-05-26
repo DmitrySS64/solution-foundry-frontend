@@ -1,386 +1,306 @@
 //canvas/renderers/ShapeRenderer
-import {
-    Circle,
-    Group,
-    Image as KonvaImage,
-    Rect,
-    RegularPolygon,
-    Text,
-} from 'react-konva'
+import { Circle, Group, Rect, RegularPolygon, Text, } from 'react-konva'
 import type Konva from 'konva'
-import type {
-    DiagramNode,
-    TempEdge
-} from '../../model/types'
-import type {
-    NodeStyle,
-    NodeTextStyle,
-} from '../../model/types/node.types.ts'
-import {
-    useEditorActions,
-    useSelectionIds,
-} from '../../store/selectors.ts'
-import {
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import type { DiagramNode, TempEdge } from '../../model/types'
+import { useEditorActions, useSelectionIds,} from '../../store/selectors.ts'
+import React, {useCallback, useEffect, useMemo, useState, useRef} from "react";
 import {getNodeAnchors} from "../../model/factories/getNodeAnchors.ts";
 import {AnchorOverlay} from "./AnchorOverlay.tsx";
 import {nodeRegistry} from "@/modules/diagram/model/registry/nodeRegistry.ts";
 import {useEditorStore} from "@/modules/diagram/store/editor.store.ts";
 import {edgeRegistry} from "@/modules/diagram/model/registry/edgeRegistry.ts";
-import {
-    syncEdgeKonva,
-} from "@/modules/diagram/model/util/syncEdgeKonva.ts";
+import { syncEdgeKonva, } from "@/modules/diagram/model/util/syncEdgeKonva.ts";
 import { customRendererRegistry } from '@/modules/diagram/canvas/customRenderers';
+import {EditableLabel} from "@/modules/diagram/canvas/renderers/EditableLabel.tsx";
+import {NotationImage} from "@/modules/diagram/canvas/renderers/NotationImage.tsx";
+import {getPreserveAspectRatio, resolveImageSource} from "@/modules/diagram/canvas/renderers/utils/imageUtils.ts";
+import {getKonvaFontStyle, mergeTextStyles} from "@/modules/diagram/canvas/renderers/utils/textStyles.ts";
+import {stopKonvaPropagation} from "@/modules/diagram/canvas/renderers/utils/eventHandlers.ts";
+import { debounce, DebouncedFunc } from 'lodash';
 
-const SvgNodeImage = ({
-    svg,
-    width,
-    height,
-}: {
-    svg: string
-    width: number
-    height: number
-}) => {
-    const [image, setImage] =
-        useState<HTMLImageElement | null>(null)
+// === CONSTANTS ===
+const DEFAULT_NODE_STYLE = {
+    fill: '#DBEAFE',
+    stroke: '#3B82F6',
+    strokeWidth: 2,
+    cornerRadius: 8,
+    opacity: 1,
+} as const;
 
-    useEffect(() => {
-        const nextImage =
-            new window.Image()
+const MIN_NODE_SIZE = 40;
 
-        nextImage.onload = () =>
-            setImage(nextImage)
-
-        nextImage.src =
-            `data:image/svg+xml;charset=utf-8,${
-                encodeURIComponent(svg)
-            }`
-    }, [svg])
-
-    if (!image) {
-        return null
-    }
-
-    return (
-        <KonvaImage
-            image={image}
-            width={width}
-            height={height}
-            listening={false}
-        />
-    )
-}
-
+// === TYPES ===
 interface Props {
-    node: DiagramNode,
-    tempConnectionRef: React.MutableRefObject<TempEdge>
-    isConnectingRef: React.MutableRefObject<boolean>
-    onStartConnection: (
-        nodeId: string,
-        anchorId: string,
-        x: number,
-        y: number,
-    ) => void
-    onFinishConnection: (
-        nodeId: string,
-        anchorId?: string,
-    ) => void
+    nodeId: string;
+    isEditable: boolean;
+    tempConnectionRef: React.MutableRefObject<TempEdge>;
+    isConnectingRef: React.MutableRefObject<boolean>;
+    onStartConnection: (nodeId: string, anchorId: string, x: number, y: number) => void;
+    onFinishConnection: (nodeId: string, anchorId?: string) => void;
+    onStartEditing?: (nodeId: string) => void;
+    onStopEditing?: () => void;
 }
 
-const ShapeRenderer = ({
-    node,
-    tempConnectionRef,
-    isConnectingRef,
-    onStartConnection,
-    onFinishConnection
-}: Props) => {
 
-    const selection = useSelectionIds()
-    const anchorHighlight =
-        useEditorStore(s =>
-            s.interaction.anchorHighlightNodeId === node.id
-        )
-    const [hovered, setHovered] = useState(false)
-    const { updateNode, selectNode, setNodeDragActive } =
-        useEditorActions()
+// === COMPONENT ===
+export const ShapeRenderer = ({
+                                  nodeId,
+                                  isEditable,
+                                  tempConnectionRef,
+                                  isConnectingRef,
+                                  onStartConnection,
+                                  onFinishConnection,
+                                  onStartEditing,
+                                  onStopEditing,
+                              }: Props) => {
+    // === SELECTORS ===
+    const node = useEditorStore(s => s.document?.nodes?.find(n => n.id === nodeId));
+    const selection = useSelectionIds();
+    const { updateNode, selectNode, setNodeDragActive } = useEditorActions();
+    const anchorHighlight = useEditorStore(s =>
+        node ? s.interaction.anchorHighlightNodeId === node.id : false
+    );
+    const [hovered, setHovered] = useState(false);
 
-    const isSelected =
-        selection.includes(node.id)
+    // === DERIVED STATE ===
+    const isSelected = useMemo(() =>
+            node ? (selection ?? []).includes(node.id) : false,
+        [node?.id, selection]
+    );
 
-    const nodeStyle: NodeStyle =
-        Object.assign(
-            {
-                fill: '#DBEAFE',
-                stroke: '#3B82F6',
-                strokeWidth: 2,
-                cornerRadius: 8,
-                opacity: 1,
-            },
-            node.style,
-        )
+    const nodeStyle = useMemo(() => ({
+        ...DEFAULT_NODE_STYLE,
+        ...node?.style,
+    }), [node?.style]);
 
-    const textStyle: NodeTextStyle =
-        Object.assign(
-            {
-                fill: '#111827',
-                fontSize: 13,
-                fontFamily: 'Arial',
-                fontStyle: 'normal' as const,
-                fontWeight: 'normal' as const,
-                align: 'center' as const,
-            },
-            node.textStyle,
-        )
+    const textStyle = useMemo(() =>
+            mergeTextStyles(node?.textStyle),
+        [node?.textStyle]
+    );
 
-    const konvaFontStyle =
-        textStyle.fontStyle === 'italic' && textStyle.fontWeight === 'bold'
-            ? 'italic bold'
-            : textStyle.fontStyle === 'italic'
-                ? 'italic'
-                : textStyle.fontWeight === 'bold'
-                    ? 'bold'
-                    : 'normal'
+    const anchors = useMemo(() =>
+            node ? getNodeAnchors(node, true) : [],
+        [node?.id, node?.width, node?.height]
+    );
 
-    const anchors = useMemo(
-        () => getNodeAnchors(node, true),
-        [node.id, node.width, node.height]
-    )
+    const primitives = useMemo(() =>
+            node?.notation?.primitives ?? [{ type: node?.type, x: 0, y: 0, width: 1, height: 1 }],
+        [node?.type, node?.notation?.primitives]
+    );
 
-    const updateEdgesForNode = (nextNode: DiagramNode) => {
-        const state = useEditorStore.getState()
-        const edges = state.document.edges
-        const allNodes = state.document.nodes.map(n =>
+    // === EDGE SYNC ===
+    const updateEdgesForNode = useCallback((nextNode: DiagramNode) => {
+        const state = useEditorStore.getState();
+
+        // ✅ Защита: если edges undefined — используем пустой массив
+        const edges = state.document?.edges ?? [];
+        const nodes = state.document?.nodes ?? [];
+
+        // Находим слой для перерисовки
+        const edgeLayer = edges
+            .filter(e => e.source?.nodeId === nextNode.id || e.target?.nodeId === nextNode.id)
+            .reduce<Konva.Layer | null>((layer, edge) => {
+                const refs = edgeRegistry.get(edge.id);
+                if (refs && !layer) return refs.line.getLayer();
+                return layer;
+            }, null);
+
+        // Создаём массив всех нод с обновлённой текущей
+        const allNodes = nodes.map(n =>
             n.id === nextNode.id ? nextNode : n
-        )
+        );
 
-        let edgeLayer: Konva.Layer | null = null
-
-        const relatedEdges = edges.filter(
-            e => e.source.nodeId === nextNode.id || e.target.nodeId === nextNode.id
-        )
-
-        for (const edge of relatedEdges) {
-            const refs = edgeRegistry.get(edge.id)
-            if (refs) {
-                edgeLayer ??= refs.line.getLayer()
+        // Пересчитываем геометрию рёбер
+        for (const edge of edges) {
+            if (edge.source?.nodeId === nextNode.id || edge.target?.nodeId === nextNode.id) {
+                syncEdgeKonva(edge, allNodes);
             }
-            syncEdgeKonva(edge, allNodes)
         }
 
-        edgeLayer?.batchDraw()
-    };
+        // Перерисовываем слой, если нашли
+        edgeLayer?.batchDraw();
+    }, []);
 
-    const scaleValue = (
+    // Sync edges when node position/size changes (from network or local)
+    useEffect(() => {
+        if (node && node.x !== undefined && node.y !== undefined) {
+            updateEdgesForNode(node);
+        }
+    }, [node?.x, node?.y, node?.width, node?.height, updateEdgesForNode]);
+
+    // Cleanup on unmount
+    useEffect(() => () => {
+        const konvaGroup = nodeRegistry.get(nodeId);
+        if (konvaGroup) {
+            konvaGroup.destroy();
+            nodeRegistry.delete(nodeId);
+        }
+    }, [nodeId]);
+
+    // === EVENT HANDLERS ===
+    const dragState = useRef<{ x: number; y: number } | null>(null);
+
+    const handleDragMove = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
+        if (!node) return;
+        const pos = e.target.position();
+
+        // 1. Локально обновляем позицию для плавного UI (без Zustand/Yjs)
+        dragState.current = { x: pos.x, y: pos.y };
+
+        // 2. Мгновенно перерисовываем только привязанные рёбра (Konva layer)
+        updateEdgesForNode({ ...node, x: pos.x, y: pos.y });
+
+        // 3. Debounced-отправка в сеть (не чаще 1 раза в 100-150мс)
+        debouncedNetworkSync.current?.();
+    }, [node, updateEdgesForNode]);
+
+// Debounce для сетевой синхронизации
+    const debouncedNetworkSync = useRef<DebouncedFunc<(() => void)> | null>(null);
+
+    useEffect(() => {
+        const debounced = debounce(() => {
+            if (dragState.current && node) {
+                updateNode(node.id, { x: dragState.current.x, y: dragState.current.y });
+                dragState.current = null;
+            }
+        }, 150); // 150мс — баланс между плавностью и нагрузкой на сеть
+
+        debouncedNetworkSync.current = debounced;
+
+        return () => {
+            debouncedNetworkSync.current?.cancel();
+        };
+    }, [node?.id, updateNode]);
+
+    const handleDragEnd = useCallback(() => {
+        setNodeDragActive(false);
+
+        // Финальный синк, если остались незаписанные изменения
+        if (dragState.current && node) {
+            updateNode(node.id, { x: dragState.current.x, y: dragState.current.y });
+            dragState.current = null;
+            debouncedNetworkSync.current?.cancel();
+        }
+    }, [node, updateNode, setNodeDragActive]);
+
+    const handleDragStart = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
+        if (isConnectingRef.current) {
+            e.target.stopDrag();
+            return;
+        }
+        stopKonvaPropagation(e);
+        setNodeDragActive(true);
+    }, [isConnectingRef, setNodeDragActive]);
+
+    const handleMouseUp = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
+        if (!node || !tempConnectionRef.current.active) return;
+        stopKonvaPropagation(e);
+        onFinishConnection(node.id);
+    }, [node, tempConnectionRef, onFinishConnection]);
+
+    const handleLabelUpdate = useCallback((newLabel: string) => {
+        if (node) updateNode(node.id, { label: newLabel });
+    }, [node, updateNode]);
+
+    // === RENDER HELPERS ===
+    const scaleValue = useCallback((
         value: number | undefined,
         fallback: number,
-        size: number,
-    ) => {
-        if (value === undefined) return fallback
+        size: number
+    ): number => {
+        if (value === undefined) return fallback;
+        return Math.abs(value) <= 1 ? value * size : value;
+    }, []);
 
-        return Math.abs(value) <= 1
-            ? value * size
-            : value
-    }
+    const renderPrimitive = useCallback((primitive: any, index: number) => {
+        if (!node) return null;
 
-    const primitives =
-        node.notation?.primitives
-        ?? [
-            {
-                type: node.type,
-                x: 0,
-                y: 0,
-                width: 1,
-                height: 1,
-            },
-        ]
+        const primitiveWidth = scaleValue(primitive.width, node.width, node.width);
+        const primitiveHeight = scaleValue(primitive.height, node.height, node.height);
+        const primitiveX = scaleValue(primitive.x, 0, node.width);
+        const primitiveY = scaleValue(primitive.y, 0, node.height);
+        const strokeWidth = primitive.strokeWidth ?? (isSelected ? nodeStyle.strokeWidth * 1.3 : nodeStyle.strokeWidth);
 
-    return (
-        <Group
-            id={node.id}
-            ref={(ref) => {
-                if(!ref) {
-                    nodeRegistry.delete(node.id)
-                    return
-                }
-                nodeRegistry.set(node.id, ref)
-            }}
-            x={node.x}
-            y={node.y}
-            draggable={!isConnectingRef.current}
-            onMouseDown={(e)=>{
-                e.cancelBubble = true
-            }}
-            onDragStart={(e) => {
-                if (isConnectingRef.current){
-                    e.target.stopDrag()
-                    return
-                }
-                e.cancelBubble = true;
-                setNodeDragActive(true)
-            }}
-            onClick={() => selectNode(node.id)}
-            onDragMove={(e) => {
-                const pos = e.target.position();
+        const commonProps = {
+            fill: primitive.fill ?? nodeStyle.fill,
+            stroke: primitive.stroke ?? nodeStyle.stroke,
+            strokeWidth,
+            opacity: nodeStyle.opacity,
+        };
 
-                updateEdgesForNode({
-                    ...node,
-                    x: pos.x,
-                    y: pos.y,
-                });
-            }}
-            onDragEnd={(e) => {
-                if (isConnectingRef.current){
-                    return
-                }
-                setNodeDragActive(false)
-                //e.cancelBubble = true
-                updateNode(node.id, {
-                    x: e.target.x(),
-                    y: e.target.y(),
-                })
-            }}
-            onMouseEnter={()=>setHovered(true)}
-            onMouseLeave={() => {
-                setHovered(false)
-                }
+        switch (primitive.type) {
+            case 'circle':
+                return (
+                    <Circle
+                        key={`${node.id}-primitive-${index}`}
+                        x={primitiveX}
+                        y={primitiveY}
+                        radius={scaleValue(primitive.radius, Math.min(node.width, node.height) / 2, Math.min(node.width, node.height))}
+                        {...commonProps}
+                    />
+                );
+            case 'diamond':
+                return (
+                    <RegularPolygon
+                        key={`${node.id}-primitive-${index}`}
+                        x={primitiveX + primitiveWidth / 2}
+                        y={primitiveY + primitiveHeight / 2}
+                        sides={4}
+                        radius={Math.min(primitiveWidth, primitiveHeight) / Math.SQRT2}
+                        rotation={45}
+                        {...commonProps}
+                    />
+                );
+            case 'text': {
+                const boundText = primitive.textKey
+                    ? primitive.textKey === 'label'
+                        ? node.label
+                        : String(node.notation?.properties.find(p => p.name === primitive.textKey)?.value ?? '')
+                    : (primitive.text ?? '');
+
+                return (
+                    <Text
+                        key={`${node.id}-primitive-${index}`}
+                        x={primitiveX}
+                        y={primitiveY}
+                        width={primitiveWidth}
+                        height={primitiveHeight}
+                        text={boundText}
+                        fill={primitive.fill ?? textStyle.fill}
+                        fontSize={primitive.fontSize ?? textStyle.fontSize}
+                        fontFamily={primitive.fontFamily ?? textStyle.fontFamily}
+                        fontStyle={getKonvaFontStyle({
+                            fontStyle: primitive.fontStyle,
+                            fontWeight: primitive.fontWeight,
+                        })}
+                        align={primitive.align ?? textStyle.align}
+                        verticalAlign="middle"
+                        listening={false}
+                    />
+                );
             }
-            onMouseUp={(e) => {
-                if (!tempConnectionRef.current.active) return
-                e.cancelBubble = true
-                onFinishConnection(node.id)
-            }}
-        >
-            {node.customRendererId && (() => {
-                const renderer = customRendererRegistry.get(node.customRendererId!);
-                return renderer ? renderer({ node }) : null;
-            })()}
+            case 'image':
+            case 'svg': {
+                const source = primitive.type === 'svg'
+                    ? { svg: primitive.svg, src: primitive.src, url: primitive.url, href: primitive.href }
+                    : { src: primitive.src, url: primitive.url, href: primitive.href, svg: primitive.svg };
 
-            {(!node.customRendererId || !customRendererRegistry.get(node.customRendererId)) && node.notation?.svg && (
-                <SvgNodeImage
-                    svg={node.notation.svg}
-                    width={node.width}
-                    height={node.height}
-                />
-            )}
+                const resolved = resolveImageSource(source);
+                if (!resolved) return null;
 
-            {(!node.customRendererId || !customRendererRegistry.get(node.customRendererId)) &&
-                (!node.notation?.svg) &&
-                primitives.map((primitive, index) => {
-                const primitiveWidth =
-                    scaleValue(
-                        primitive.width,
-                        node.width,
-                        node.width,
-                    )
-
-                const primitiveHeight =
-                    scaleValue(
-                        primitive.height,
-                        node.height,
-                        node.height,
-                    )
-
-                const primitiveX =
-                    scaleValue(
-                        primitive.x,
-                        0,
-                        node.width,
-                    )
-
-                const primitiveY =
-                    scaleValue(
-                        primitive.y,
-                        0,
-                        node.height,
-                    )
-
-                const strokeWidth =
-                    primitive.strokeWidth
-                    ?? (
-                        isSelected
-                            ? nodeStyle.strokeWidth * 1.3
-                            : nodeStyle.strokeWidth
-                    )
-
-                const commonProps = {
-                    fill: primitive.fill ?? nodeStyle.fill,
-                    stroke: primitive.stroke ?? nodeStyle.stroke,
-                    strokeWidth,
-                    opacity: nodeStyle.opacity,
-                }
-
-                if (primitive.type === 'circle') {
-                    return (
-                        <Circle
-                            key={`${node.id}-primitive-${index}`}
-                            x={primitiveX}
-                            y={primitiveY}
-                            radius={
-                                scaleValue(
-                                    primitive.radius,
-                                    Math.min(node.width, node.height) / 2,
-                                    Math.min(node.width, node.height),
-                                )
-                            }
-                            {...commonProps}
-                        />
-                    )
-                }
-
-                if (primitive.type === 'diamond') {
-                    return (
-                        <RegularPolygon
-                            key={`${node.id}-primitive-${index}`}
-                            x={primitiveX + primitiveWidth / 2}
-                            y={primitiveY + primitiveHeight / 2}
-                            sides={4}
-                            radius={Math.min(primitiveWidth, primitiveHeight) / Math.SQRT2}
-                            rotation={45}
-                            {...commonProps}
-                        />
-                    )
-                }
-
-                if (primitive.type === 'text') {
-                    const boundText =
-                        primitive.textKey
-                            ? String(
-                                node.notation?.properties.find(
-                                    p => p.name === primitive.textKey
-                                )?.value ?? ''
-                            )
-                            : (primitive.text ?? '')
-
-                    return (
-                        <Text
-                            key={`${node.id}-primitive-${index}`}
-                            x={primitiveX}
-                            y={primitiveY}
-                            width={primitiveWidth}
-                            height={primitiveHeight}
-                            text={boundText}
-                            fill={primitive.fill ?? textStyle.fill}
-                            fontSize={primitive.fontSize ?? textStyle.fontSize}
-                            fontFamily={primitive.fontFamily ?? textStyle.fontFamily}
-                            fontStyle={
-                                primitive.fontStyle === 'italic' && primitive.fontWeight === 'bold'
-                                    ? 'italic bold'
-                                    : primitive.fontStyle === 'italic'
-                                        ? 'italic'
-                                        : primitive.fontWeight === 'bold'
-                                            ? 'bold'
-                                            : 'normal'
-                            }
-                            align={primitive.align ?? textStyle.align}
-                            verticalAlign='middle'
-                            listening={false}
-                        />
-                    )
-                }
-
+                return (
+                    <NotationImage
+                        key={`${node.id}-primitive-${index}`}
+                        source={source}
+                        x={primitiveX}
+                        y={primitiveY}
+                        width={primitiveWidth}
+                        height={primitiveHeight}
+                        preserveAspectRatio={primitive.preserveAspectRatio ?? true}
+                    />
+                );
+            }
+            default:
                 return (
                     <Rect
                         key={`${node.id}-primitive-${index}`}
@@ -391,58 +311,94 @@ const ShapeRenderer = ({
                         cornerRadius={nodeStyle.cornerRadius}
                         {...commonProps}
                     />
-                )
-            })}
+                );
+        }
+    }, [node, isSelected, nodeStyle, textStyle, scaleValue]);
 
-            {node.renderLabel !== false && (
-                <Text
+    // === EARLY RETURN ===
+    if (!node) return null;
+
+    // === RENDER ===
+    return (
+        <Group
+            id={node.id}
+            ref={(ref) => {
+                if (!ref) {
+                    nodeRegistry.delete(node.id);
+                    return;
+                }
+                nodeRegistry.set(node.id, ref);
+            }}
+            x={node.x}
+            y={node.y}
+            draggable={!isConnectingRef.current}
+            onMouseDown={stopKonvaPropagation}
+            onDragStart={handleDragStart}
+            onClick={() => selectNode(node.id)}
+            onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onMouseUp={handleMouseUp}
+        >
+            {/* Hit area for easier selection */}
+            <Rect
+                width={node.width}
+                height={node.height}
+                fill="transparent"
+                strokeWidth={0}
+            />
+
+            {/* Custom renderer override */}
+            {node.customRendererId && customRendererRegistry.get(node.customRendererId)?.({ node })}
+
+            {/* Image/SVG notation */}
+            {!node.customRendererId && (node.notation?.image || node.notation?.svg) && (
+                <NotationImage
+                    source={node.notation.image ?? node.notation.svg!}
                     width={node.width}
                     height={node.height}
-
-                    text={node.label}
-
-                    fill={textStyle.fill}
-                    fontSize={textStyle.fontSize}
-                    fontFamily={textStyle.fontFamily}
-                    fontStyle={konvaFontStyle}
-                    align={textStyle.align}
-                    verticalAlign="middle"
-
-                    listening={false}
+                    preserveAspectRatio={getPreserveAspectRatio(node.notation.image ?? node.notation.svg)}
                 />
             )}
-            {(hovered || anchorHighlight) && (
-                <>
-                    {anchors.map(anchor => (
-                        <AnchorOverlay
-                            key={anchor.id}
 
-                            x={anchor.x}
-                            y={anchor.y}
-
-                            onStartConnection={() => {
-                                onStartConnection(
-                                    node.id,
-                                    anchor.id,
-
-                                    node.x + anchor.x,
-                                    node.y + anchor.y,
-                                )
-                            }}
-                            onFinishConnection={() => {
-                                onFinishConnection(
-                                    node.id,
-                                    anchor.id,
-                                )
-                            }}
-                        />
-                    ))}
-                </>
+            {/* Primitives rendering */}
+            {!node.customRendererId && !node.notation?.svg && !node.notation?.image && (
+                primitives.map((primitive, index) => renderPrimitive(primitive, index))
             )}
-        </Group>
-    )
-}
 
-export {
-    ShapeRenderer
-}
+            {/* Editable label */}
+            {node.renderLabel !== false && !node.textOutsideGroup && (
+                <EditableLabel
+                    x={0}
+                    y={0}
+                    width={node.width}
+                    height={node.height}
+                    text={node.label}
+                    textStyle={textStyle}
+                    isEditable={isEditable}
+                    onUpdate={handleLabelUpdate}
+                    nodeId={nodeId}
+                    onStartEditing={() => onStartEditing?.(nodeId)}
+                    onStopEditing={() => onStopEditing?.()}
+                />
+            )}
+
+            {/* Anchor overlays on hover */}
+            {(hovered || anchorHighlight) && anchors.map(anchor => (
+                <AnchorOverlay
+                    key={anchor.id}
+                    x={anchor.x}
+                    y={anchor.y}
+                    onStartConnection={() => onStartConnection(
+                        node.id,
+                        anchor.id,
+                        node.x + anchor.x,
+                        node.y + anchor.y
+                    )}
+                    onFinishConnection={() => onFinishConnection(node.id, anchor.id)}
+                />
+            ))}
+        </Group>
+    );
+};

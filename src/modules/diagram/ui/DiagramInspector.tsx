@@ -136,7 +136,7 @@ const NodeInspector = ({
                         />
                     </PropertyField>
 
-                    <PropertyField label={t('inspector.node.cornerRadius')}>
+                    <PropertyField label={t('inspector.node.stroke')}>
                         <input
                             type='number'
                             min={0}

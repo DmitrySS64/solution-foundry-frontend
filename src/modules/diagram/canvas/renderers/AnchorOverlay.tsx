@@ -14,19 +14,14 @@ const AnchorOverlay = ({
                            onStartConnection,
                            onFinishConnection,
                        }: Props) => {
-
     return (
         <Circle
             x={x}
             y={y}
-
             radius={7}
-
             fill="#2563EB"
-
             stroke="white"
             strokeWidth={2}
-
             perfectDrawEnabled={false}
             onMouseDown={(e)=>{
                 e.cancelBubble = true

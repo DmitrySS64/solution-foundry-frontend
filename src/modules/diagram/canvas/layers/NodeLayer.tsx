@@ -6,6 +6,7 @@ import type {TempEdge} from "../../model/types";
 interface Props {
     tempConnectionRef: React.MutableRefObject<TempEdge>
     isConnectingRef: React.MutableRefObject<boolean>
+    isEditable: boolean
     onStartConnection: (
         nodeId: string,
         anchorId: string,
@@ -17,27 +18,28 @@ interface Props {
         nodeId: string,
         anchorId?: string,
     ) => void
+
+    onStartEditing?: (nodeId: string) => void
+    onStopEditing?: () => void
 }
 
 const NodeLayer = ({
-    tempConnectionRef,
-    isConnectingRef,
-    onStartConnection,
-    onFinishConnection,
+    isEditable,
+    onStartEditing,
+    onStopEditing,
+    ...rest
 }: Props) => {
-
-    const nodes = useNodes()
-
+    const nodeIds = useNodes()
     return (
         <>
-            {nodes.map(node => (
+            {nodeIds.map(id => (
                 <ShapeRenderer
-                    key={node.id}
-                    node={node}
-                    tempConnectionRef={tempConnectionRef}
-                    isConnectingRef={isConnectingRef}
-                    onStartConnection={onStartConnection}
-                    onFinishConnection={onFinishConnection}
+                    key={String(id)}
+                    nodeId={id}
+                    isEditable={isEditable}
+                    onStartEditing={onStartEditing}
+                    onStopEditing={onStopEditing}
+                    {...rest}
                 />
             ))}
         </>

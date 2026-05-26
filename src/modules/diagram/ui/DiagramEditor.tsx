@@ -1,4 +1,4 @@
-//ui/DiagramEditor
+//modules/diagram/ui/DiagramEditor
 import { DiagramToolbar } from './DiagramToolbar.tsx'
 import {
     mdiChevronLeft,
@@ -10,12 +10,14 @@ import {useState} from "react";
 import {DiagramSidebar} from "./DiagramSidebar.tsx";
 import {DiagramInspector} from "./DiagramInspector.tsx";
 
-const DiagramEditor = () => {
-    const [leftOpen, setLeftOpen] =
-        useState(true)
+interface DiagramEditorProps {
+    documentId: string;
+}
 
-    const [rightOpen, setRightOpen] =
-        useState(true)
+const DiagramEditor = ({ documentId }: DiagramEditorProps) => {
+    const [leftOpen, setLeftOpen] = useState(true)
+    const [rightOpen, setRightOpen] = useState(true)
+
     return (
         <div className="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950">
             {/* TOPBAR */}
@@ -24,48 +26,28 @@ const DiagramEditor = () => {
             >
                 <IconButton
                     path={mdiChevronLeft}
-                    onClick={() =>
-                        setLeftOpen(v => !v)
-                    }
+                    onClick={() => setLeftOpen(v => !v)}
                 />
-
                 <DiagramToolbar />
-
                 <div className='flex-1' />
-
                 <IconButton
                     path={mdiChevronRight}
-                    onClick={() =>
-                        setRightOpen(v => !v)
-                    }
+                    onClick={() => setRightOpen(v => !v)}
                 />
             </div>
 
             {/* BODY */}
-            <div
-                className='flex flex-1 overflow-hidden'
-            >
-                {/* LEFT */}
+            <div className='flex flex-1 overflow-hidden'>
                 {leftOpen && (
-                    <div
-                        className='w-64 border-r border-border bg-white dark:bg-zinc-900 shrink-0 flex flex-col'
-                    >
+                    <div className='w-64 border-r border-border bg-white dark:bg-zinc-900 shrink-0 flex flex-col'>
                         <DiagramSidebar />
                     </div>
                 )}
-
-                {/* CANVAS */}
-                <div
-                    className='flex-1 overflow-hidden relative'
-                >
-                    <DiagramCanvas />
+                <div className='flex-1 overflow-hidden relative'>
+                    <DiagramCanvas documentId={documentId} />
                 </div>
-
-                {/* RIGHT */}
                 {rightOpen && (
-                    <div
-                        className='w-80 border-l border-border bg-white dark:bg-zinc-900 shrink-0 flex flex-col'
-                    >
+                    <div className='w-80 border-l border-border bg-white dark:bg-zinc-900 shrink-0 flex flex-col'>
                         <DiagramInspector />
                     </div>
                 )}

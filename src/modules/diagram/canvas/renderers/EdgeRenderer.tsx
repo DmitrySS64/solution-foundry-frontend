@@ -5,28 +5,19 @@ import Konva from 'konva'
 import {useEffect, useLayoutEffect, useRef} from 'react'
 import {edgeRegistry} from '@/modules/diagram/model/registry/edgeRegistry.ts'
 import {syncEdgeKonva} from '@/modules/diagram/model/util/syncEdgeKonva.ts'
-import {useEditorActions, useNodes} from '@/modules/diagram/store/selectors.ts'
+import {useDocument, useEditorActions} from '@/modules/diagram/store/selectors.ts'
 import {getKonvaFontStyle} from './labelStyleUtils'
+import {flattenEdgePoints, resolveEdgePoints,} from '@/modules/diagram/model/util/edgeGeometry.ts'
+interface Props {edge: DiagramEdge}
 
-import {
-    flattenEdgePoints,
-    resolveEdgePoints,
-} from '@/modules/diagram/model/util/edgeGeometry.ts'
-
-interface Props {
-    edge: DiagramEdge
-}
-
-const EdgeRenderer = ({
-    edge,
-}: Props) => {
+const EdgeRenderer = ({edge,}: Props) => {
     const lineRef = useRef<Konva.Line>(null)
     const startCapRef = useRef<Konva.Arrow>(null)
     const endCapRef = useRef<Konva.Arrow>(null)
     const hoverLeaveTimer = useRef<number>(0)
 
-    const nodes = useNodes()
-    const {selectNode, updateEdge, setHoveredEdgeId} = useEditorActions()
+    const { nodes } = useDocument()
+    const { selectNode, updateEdge, setHoveredEdgeId } = useEditorActions()
 
     const clearHoverLeave = () => {
         if (hoverLeaveTimer.current) {
@@ -69,46 +60,22 @@ const EdgeRenderer = ({
     const getPointerInLayer = (
         target: Konva.Node,
     ): EdgePoint | null => {
-        const stage =
-            target.getStage()
-
-        const layer =
-            target.getLayer()
-
-        const pointer =
-            stage?.getPointerPosition()
-
-        if (!pointer || !layer) {
-            return null
-        }
-
-        const transform =
-            layer.getAbsoluteTransform().copy()
-
+        const stage = target.getStage()
+        const layer = target.getLayer()
+        const pointer = stage?.getPointerPosition()
+        if (!pointer || !layer) return null
+        const transform = layer.getAbsoluteTransform().copy()
         transform.invert()
-
         return transform.point(pointer)
     }
-
-    const addControlPoint = (
-        point: EdgePoint,
-    ) => {
+    const addControlPoint = (point: EdgePoint,) => {
         updateEdge(edge.id, {
             type: 'orthogonal',
-            controlPoints: [
-                ...edge.controlPoints,
-                point,
-            ],
+            controlPoints: [...edge.controlPoints, point,],
         })
     }
-
-    const labelPoint =
-        resolvedPoints[
-            Math.floor(resolvedPoints.length / 2)
-        ]
-
-    const labelStyle = Object.assign(
-        {
+    const labelPoint = resolvedPoints[Math.floor(resolvedPoints.length / 2)]
+    const labelStyle = Object.assign({
             fill: edge.style.stroke,
             fontSize: 12,
             fontFamily: 'Arial',
@@ -117,13 +84,9 @@ const EdgeRenderer = ({
         },
         edge.labelStyle,
     )
-
     return (
         <Group
-            onMouseEnter={() => {
-                clearHoverLeave()
-                setHoveredEdgeId(edge.id)
-            }}
+            onMouseEnter={() => { clearHoverLeave(); setHoveredEdgeId(edge.id); }}
             onMouseLeave={() => {
                 clearHoverLeave()
                 hoverLeaveTimer.current = window.setTimeout(() => {
@@ -139,34 +102,20 @@ const EdgeRenderer = ({
                 strokeWidth={edge.style.strokeWidth}
                 dash={edge.style.dash}
                 hitStrokeWidth={8}
-                lineCap="round"
-                lineJoin="round"
+                lineCap="round" lineJoin="round"
                 perfectDrawEnabled={false}
-                onClick={(e) => {
-                    e.cancelBubble = true
-                    selectNode(edge.id)
-                }}
+                onClick={(e) => { e.cancelBubble = true; selectNode(edge.id);}}
                 onDblClick={(e) => {
                     e.cancelBubble = true
-                    const point =
-                        getPointerInLayer(e.target)
-
-                    if (point) {
-                        addControlPoint(point)
-                    }
+                    const point = getPointerInLayer(e.target)
+                    if (point) addControlPoint(point)
                 }}
             />
 
             {edge.style.startCap === 'arrow' && (
-
                 <Arrow
                     ref={startCapRef}
-                    points={[
-                        resolvedPoints[1].x,
-                        resolvedPoints[1].y,
-                        resolvedPoints[0].x,
-                        resolvedPoints[0].y,
-                    ]}
+                    points={[ resolvedPoints[1].x, resolvedPoints[1].y, resolvedPoints[0].x, resolvedPoints[0].y,]}
                     stroke={edge.style.stroke}
                     fill={edge.style.stroke}
                     strokeWidth={edge.style.strokeWidth}
@@ -175,17 +124,10 @@ const EdgeRenderer = ({
                     listening={false}
                 />
             )}
-
             {edge.style.endCap === 'arrow' && (
-
                 <Arrow
                     ref={endCapRef}
-                    points={[
-                        resolvedPoints[resolvedPoints.length - 2].x,
-                        resolvedPoints[resolvedPoints.length - 2].y,
-                        resolvedPoints[resolvedPoints.length - 1].x,
-                        resolvedPoints[resolvedPoints.length - 1].y,
-                    ]}
+                    points={[resolvedPoints[resolvedPoints.length - 2].x, resolvedPoints[resolvedPoints.length - 2].y, resolvedPoints[resolvedPoints.length - 1].x, resolvedPoints[resolvedPoints.length - 1].y,]}
                     stroke={edge.style.stroke}
                     fill={edge.style.stroke}
                     strokeWidth={edge.style.strokeWidth}
@@ -194,9 +136,6 @@ const EdgeRenderer = ({
                     listening={false}
                 />
             )}
-
-
-
             {edge.label && labelPoint && (
                 <Text
                     x={labelPoint.x + 8}
@@ -214,7 +153,6 @@ const EdgeRenderer = ({
                     listening={false}
                 />
             )}
-
         </Group>
     )
 }

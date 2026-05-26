@@ -32,9 +32,17 @@ interface NodeNotationProperty {
     editable?: boolean
 }
 
+interface NodeImageSource {
+    src?: string
+    url?: string
+    href?: string
+    svg?: string
+    preserveAspectRatio?: boolean
+}
+
 
 interface NodePrimitive {
-    type: 'rect' | 'circle' | 'diamond' | 'text' | 'svg'
+    type: 'rect' | 'circle' | 'diamond' | 'text' | 'svg' | 'image'
     x?: number
     y?: number
     width?: number
@@ -51,12 +59,18 @@ interface NodePrimitive {
     fontWeight?: 'normal' | 'bold'
     align?: 'left' | 'center' | 'right'
     svg?: string
+    src?: string
+    url?: string
+    href?: string
+    preserveAspectRatio?: boolean
 }
 
 interface NodeNotation {
     id: string
     name: string
     svg?: string
+    image?: string | NodeImageSource
+    preview?: string | NodeImageSource
     primitives?: NodePrimitive[]
     properties: NodeNotationProperty[]
 }
@@ -93,6 +107,10 @@ interface DiagramNode {
     // Если false — node.label не рендерим.
     renderLabel?: boolean
 
+    // Если true — текст рендерится в отдельном слое, вне группы.
+    // Трансформер будет применяться только к фигуре, текст визуально вне группы.
+    textOutsideGroup?: boolean
+
     // Политики растяжения/пропорций.
     // Если false — запрещаем менять width/height при resize.
     canStretch?: boolean
@@ -119,4 +137,5 @@ export type {
     NodeNotation,
     NodeNotationProperty,
     NodePrimitive,
+    NodeImageSource,
 }

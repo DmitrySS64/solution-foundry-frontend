@@ -1,86 +1,92 @@
 //store/selectors
 import { useEditorStore } from './editor.store'
+import { useShallow } from 'zustand/shallow'
 
 const useNodes = () =>
-    useEditorStore(s => s.document.nodes)
+    useEditorStore(useShallow(s => {
+        const nodes = s.document?.nodes ?? [];
+        // ✅ Возвращаем только строковые ID
+        return nodes.map(n => String(n.id));
+    }));
 
 const useEdges = () =>
-    useEditorStore(s => s.document.edges)
+    useEditorStore(useShallow(s => s.document?.edges ?? []));
 
 const useViewport = () =>
-    useEditorStore(s => s.viewport)
+    useEditorStore(useShallow(s => s.viewport))
 
 const useSetViewport = () =>
-    useEditorStore(s => s.actions.setViewport)
+    useEditorStore(useShallow(s => s.actions.setViewport))
 
 const useSelectionIds = () =>
-    useEditorStore(s => s.selection.ids)
+    useEditorStore(useShallow(s => s.selection?.ids ?? []))
 
 const useEditorActions = () =>
-    useEditorStore(s => s.actions)
+    useEditorStore(useShallow(s => s.actions))
 
 const useAddNode = () =>
-    useEditorStore(s => s.actions.addNode)
+    useEditorStore(useShallow(s => s.actions.addNode))
 const useUpdateNode = () =>
-    useEditorStore(s => s.actions.updateNode)
+    useEditorStore(useShallow(s => s.actions.updateNode))
 const useSelectNodeAction = () =>
-    useEditorStore(s => s.actions.selectNode)
+    useEditorStore(useShallow(s => s.actions.selectNode))
 
 const useDocument = () =>
-    useEditorStore(s => s.document)
+    useEditorStore(useShallow(s => s.document ?? { nodes: [], edges: [] }))
 
 const useNodeById = (
     id: string
 ) =>
-    useEditorStore(
-        s => s.document.nodes.find(
-            n => n.id === id
-        )
-    )
+    useEditorStore(useShallow(s => s.document?.nodes?.find(
+        n => n.id === id
+    )))
 
 const useSelectedNode = () =>
-    useEditorStore((state) => {
+    useEditorStore(useShallow((state) => {
 
         const selectedId =
-            state.selection.ids[0]
+            state.selection?.ids?.[0]
 
         if (!selectedId) {
             return null
         }
 
-        return state.document.nodes.find(
+        return state.document?.nodes?.find(
             node => node.id === selectedId
-        ) || null
-    })
+        ) ?? null
+    }))
 
 const useSelectedEdge = () =>
-    useEditorStore((state) => {
+    useEditorStore(useShallow((state) => {
 
         const selectedId =
-            state.selection.ids[0]
+            state.selection?.ids?.[0]
 
         if (!selectedId) {
             return null
         }
 
-        return state.document.edges.find(
+        return state.document?.edges?.find(
             edge => edge.id === selectedId
-        ) || null
-    })
+        ) ?? null
+    }))
 
 const useSelectedNodes = () =>
     useEditorStore((state) => {
-
-        return state.document.nodes.filter(
+        const ids = state.selection?.ids ?? [];
+        return state.document?.nodes?.filter(
             node =>
-                state.selection.ids.includes(
+                ids.includes(
                     node.id
                 )
-        )
+        ) ?? []
     })
 
 const useSelectionBox = () =>
-    useEditorStore(s => s.interaction.selectionBox)
+    useEditorStore(useShallow(s => s.selection?.box ?? null));
+
+const useRemoteUsers = () =>
+    useEditorStore(useShallow(s => s.remoteUsers));
 
 
 export {
@@ -99,4 +105,5 @@ export {
     useSelectedEdge,
     useSelectedNodes,
     useSelectionBox,
+    useRemoteUsers
 }

@@ -22,7 +22,7 @@ export const createNode = (
         width: definition?.box?.initialWidth ?? 160,
         height: definition?.box?.initialHeight ?? 80,
         rotation: 0,
-        label: 'Node',
+        label: definition?.defaultLabel ?? 'Node',
         ...(definition?.customRendererId
             ? { customRendererId: definition.customRendererId }
             : {}),
@@ -49,5 +49,6 @@ export const createNode = (
         updatedAt: now,
         edges: [],
         renderLabel: definition?.renderLabel ?? true,
+        textOutsideGroup: definition?.textOutsideGroup ?? false,
     }
 }

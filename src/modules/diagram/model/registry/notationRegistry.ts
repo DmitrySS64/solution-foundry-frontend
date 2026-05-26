@@ -17,10 +17,12 @@ export type NotationBoxRules = {
 export type NotationDefinition = {
     type: NodeType
     label: string
+    defaultLabel?: string
     notation: NodeNotation
     notationId: string
     box: NotationBoxRules
     renderLabel?: boolean
+    textOutsideGroup?: boolean
 }
 
 type RawNotationProperty = {
@@ -40,8 +42,12 @@ type RawNotationElement = {
         width?: number
         height?: number
         shapeType?: string
+        renderLabel?: boolean
     }
+    image?: unknown
+    preview?: unknown
     primitives?: any[]
+    renderLabel?: boolean
 }
 
 type RawNotation = {
@@ -97,25 +103,44 @@ const mapNotationElements = (
 
         const rawProperties = (el.properties ?? []) as any[]
         const properties = normalizeProperties(rawProperties)
+        const labelProperty =
+            rawProperties.find(p => p?.name === 'label')
 
         const shapeType = el.defaults?.shapeType as string | undefined
         const primitives = (el.primitives ?? undefined) as any[] | undefined
+        const hasImage =
+            Boolean(el.image)
+            || Boolean((el as any).svg)
+            || primitives?.some(
+                primitive =>
+                    primitive?.type === 'image'
+                    || primitive?.type === 'svg',
+            )
+            || false
 
         return {
-            type,
-            label: String(el.name),
-            notationId,
-            box: {
-                initialWidth: Number(el.defaults?.width ?? 160),
-                initialHeight: Number(el.defaults?.height ?? 80),
-                canStretch: true,
-                preserveAspectRatio: false,
-            },
-            // сейчас label рисуется на уровне ShapeRenderer (renderLabel=false)
-            renderLabel: false,
-            notation: {
+                    type,
+                    label: String(el.name),
+                    defaultLabel: String(labelProperty?.default ?? el.name ?? 'Node'),
+                    notationId,
+                    box: {
+                        initialWidth: Number(el.defaults?.width ?? 160),
+                        initialHeight: Number(el.defaults?.height ?? 80),
+                        canStretch: true,
+                        preserveAspectRatio: false,
+                    },
+                    renderLabel: Boolean(
+                        el.renderLabel
+                        ?? el.defaults?.renderLabel
+                        ?? hasImage,
+                    ),
+                    textOutsideGroup: Boolean(el.textOutsideGroup),
+                    notation: {
                 id: `${notationId}.${String(el.type)}`,
                 name: String(el.name),
+                image: el.image as any,
+                preview: el.preview as any,
+                svg: (el as any).svg,
                 properties: properties as any,
                 primitives: (primitives && primitives.length > 0)
                     ? primitives

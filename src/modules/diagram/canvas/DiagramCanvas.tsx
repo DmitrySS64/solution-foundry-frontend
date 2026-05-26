@@ -1,622 +1,196 @@
-//canvas/DiagramCanvas.tsx
+//modules/diagram/canvas/DiagramCanvas.tsx
 import {
-    useEffect,
+    useCallback,
+    useEffect, useMemo,
     useRef,
+    useState,
 } from 'react'
 import Konva from 'konva'
-import {
-    Stage,
-    Layer,
-} from 'react-konva'
-import {
-    GridLayer,
-    EdgeLayer,
-    NodeLayer,
-    TransformerLayer,
-    SelectionLayer,
-} from './layers'
-import type {ISelectionBox} from "../store/slices/selection.slice.ts";
+import { Stage, Layer,} from 'react-konva'
+import { GridLayer, EdgeLayer, NodeLayer, TransformerLayer, SelectionLayer,} from './layers'
 import {TemporaryEdge, EdgeHandlesOverlay} from "./renderers";
 import {useEditorStore} from "../store/editor.store.ts";
-import type {DiagramEdge, TempEdge} from "../model/types";
-import {getNodeAnchors} from "@/modules/diagram/model/factories/getNodeAnchors.ts";
-import {closestPointOnRectPerimeter} from "@/modules/diagram/model/util/edgeGeometry.ts";
-import { createNode } from "../model/factories/create-node";
+import { useDiagramCollaboration } from '../store/useDiagramCollaboration.ts';
+import { RemoteCursorsLayer } from './layers/RemoteCursorsLayer.tsx';
 
+import { useDrawScheduler } from './hooks/useDrawScheduler';
+import { useViewportManagement } from './hooks/useViewportManagement';
+import { useConnectionManagement } from './hooks/useConnectionManagement';
+import { useMouseHandlers } from './hooks/useMouseHandlers';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useDragDrop } from './hooks/useDragDrop';
+import { useCollaborationSync } from './hooks/useCollaborationSync';
+import {useSelectionBox, useViewport} from "@/modules/diagram/store/selectors.ts";
 
-const DiagramCanvas = () => {
-    const {
-        setViewport,
-        deleteSelection,
-        setAnchorHighlightNodeId,
-        selectNode,
-        undo,
-        redo,
-    } = useEditorStore(state => state.actions)
+interface DiagramCanvasProps {
+    documentId: string;
+}
 
-    const pastLen = useEditorStore(state => state.history.past.length)
-    const futureLen = useEditorStore(state => state.history.future.length)
-
-
-    // STAGE
-
-    const stageRef =
-        useRef<Konva.Stage>(null)
-
-    // LAYERS
-    const gridLayerRef = useRef<Konva.Layer>(null)
-    const edgeLayerRef = useRef<Konva.Layer>(null)
-    const handlesLayerRef = useRef<Konva.Layer>(null)
-    const nodeLayerRef = useRef<Konva.Layer>(null)
-    const overlayLayerRef = useRef<Konva.Layer>(null)
-
-    // VIEWPORT
-    const viewportRef =
-        useRef({
-            x: 0,
-            y: 0,
-            zoom: 1,
-        })
-
-    // FLAGS
-    const isDragging = useRef(false)
-    const isConnecting = useRef(false)
-
-
-    // POINTER
-    const lastPointer =
-        useRef({
-            x: 0,
-            y: 0,
-        })
-
-    // SELECTION
-    const selectionStart = useRef<{
-        x:number,
-        y:number
-    } | null>(null)
-    const selectionBox =
-        useRef<ISelectionBox>({
-            active: false,
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-        })
-
-    // TEMP CONNECTION
-    const tempConnection =
-        useRef<TempEdge>({
-            active: false,
-
-            fromX: 0,
-            fromY: 0,
-
-            toX: 0,
-            toY: 0,
-        })
-
-    // RAF DRAW
-    const animationFrame =
-        useRef<number | null>(null)
-
-    const requestDraw = (
-        target:
-            | 'grid'
-            | 'edges'
-            | 'handles'
-            | 'nodes'
-            | 'overlay'
-            | 'all' = 'all'
-    ) => {
-        if (animationFrame.current) {
-            return
-        }
-
-        animationFrame.current =
-            requestAnimationFrame(() => {
-                switch (target) {
-                    case "grid":
-                        gridLayerRef.current?.batchDraw()
-                        break
-                    case "edges":
-                        edgeLayerRef.current?.batchDraw()
-                        break
-                    case "handles":
-                        handlesLayerRef.current?.batchDraw()
-                        break
-                    case "nodes":
-                        nodeLayerRef.current?.batchDraw()
-                        break
-                    case "overlay":
-                        overlayLayerRef.current?.batchDraw()
-                        break
-                    default:
-                        gridLayerRef.current?.batchDraw()
-                        edgeLayerRef.current?.batchDraw()
-                        handlesLayerRef.current?.batchDraw()
-                        nodeLayerRef.current?.batchDraw()
-                        overlayLayerRef.current?.batchDraw()
-                }
-                animationFrame.current = null
-            })
+const useToggleReadOnly = () => {
+    const [isReadOnly, setIsReadOnly] = useState(true);
+    const toggle = () => setIsReadOnly(!isReadOnly)
+    return {
+        isReadOnly, toggle
     }
+}
 
+const DiagramCanvas = ({ documentId }: DiagramCanvasProps) => {
+    // === STATE ===
+    const { isReadOnly } = useToggleReadOnly();
+    const { setViewport: setViewportAction, setEditable } = useEditorStore(s => s.actions);
+    useEffect(()=>{ setEditable(!isReadOnly) }, [isReadOnly, setEditable])
+    const isEditable = useEditorStore(s => s.isEditable);
 
-    // APPLY VIEWPORT
-    const applyViewport = () => {
+    // === REFS ===
+    const stageRef = useRef<Konva.Stage>(null);
+    const layerRefs = {
+        grid: useRef<Konva.Layer>(null),
+        edges: useRef<Konva.Layer>(null),
+        handles: useRef<Konva.Layer>(null),
+        nodes: useRef<Konva.Layer>(null),
+        overlay: useRef<Konva.Layer>(null),
+    };
 
-        const layers = [
-            gridLayerRef.current,
-            nodeLayerRef.current,
-            edgeLayerRef.current,
-            handlesLayerRef.current,
-        ]
+    // === HOOKS ===
+    const { requestDraw, cleanup: cleanupDraw } = useDrawScheduler(layerRefs);
+    const { viewportRef, applyViewport, zoomAtPointer, panBy } = useViewportManagement(
+        { x: 0, y: 0, zoom: 1 },
+        { layers: layerRefs, requestDraw }
+    );
 
-        layers.forEach(layer => {
-            if (!layer) return
+    const applyViewportWithSync = useCallback(() => {
+        applyViewport();
+        const { x, y, zoom } = viewportRef.current;
+        setViewportAction(x, y, zoom);
+    }, [applyViewport, viewportRef, setViewportAction]);
 
-            layer.position({
-                x: viewportRef.current.x,
-                y: viewportRef.current.y,
-            })
+    const { tempConnection, isConnecting, startConnection, finishConnection, cancelConnection, updateTempConnection } =
+        useConnectionManagement({ requestDraw });
 
-            layer.scale({
-                x: viewportRef.current.zoom,
-                y: viewportRef.current.zoom,
-            })
-        })
-
-        setViewport(
-            viewportRef.current.x,
-            viewportRef.current.y,
-            viewportRef.current.zoom
-        )
-
-        requestDraw('all')
-    }
-
-    // CONNECTIONS
-    const startConnection = (
-        nodeId: string,
-        anchorId: string,
-        x: number,
-        y: number,
-    ) => {
-
-        isConnecting.current = true
-
-        tempConnection.current = {
-
-            active: true,
-
-            fromNodeId: nodeId,
-            fromAnchor: anchorId,
-
-            fromX: x,
-            fromY: y,
-
-            toX: x,
-            toY: y,
-        }
-
-        requestDraw('edges')
-    }
-
-    const finishConnection = (
-        targetNodeId: string,
-        targetAnchorId?: string,
-    ) => {
-
-        const c = tempConnection.current
-
-        if (!c.active) {
-            return
-        }
-
-        // same node cancel
-        if (c.fromNodeId === targetNodeId) {
-            cancelConnection()
-            return
-        }
-
-        const nodes = useEditorStore
-            .getState()
-            .document
-            .nodes
-
-        const targetNode = nodes.find(n => n.id === targetNodeId)
-
-        if (!targetNode) return
-
-        const targetAnchors =
-            getNodeAnchors(targetNode)
-
-        const targetAnchor =
-            targetAnchors.find(
-                a => a.id === targetAnchorId
-            )
-
-        const targetPoint = targetAnchor
-            ? {x: targetAnchor.x, y: targetAnchor.y}
-            : closestPointOnRectPerimeter(
-                targetNode,
-                {x: c.fromX, y: c.fromY},
-            )
-
-        const edge : DiagramEdge = {
-
-            id: crypto.randomUUID(),
-
-            type: 'straight',
-
-            source: {
-                nodeId: c.fromNodeId,
-                anchorId: c.fromAnchor,
-
-                point: {
-                    x: c.fromX,
-                    y: c.fromY
-                }
-            },
-
-            target: {
-                nodeId: targetNodeId,
-                anchorId: targetAnchorId,
-                point: targetPoint,
-            },
-
-            controlPoints: [],
-
-            style: {
-                stroke: '#111827',
-                strokeWidth: 2,
-                startCap: 'none',
-                endCap: 'arrow',
-            },
-            labelStyle: {
-                fill: '#111827',
-                fontSize: 12,
-                fontFamily: 'Arial',
-                fontStyle: 'normal',
-                fontWeight: 'normal',
-            },
-        }
-
-        useEditorStore
-            .getState()
-            .actions
-            .addEdge(edge)
-
-        cancelConnection()
-    }
-
-    const cancelConnection = () => {
-        isConnecting.current = false
-
-        tempConnection.current.active = false
-
-        requestDraw('edges')
-    }
-
-    // MOUSE EVENTS
-    const handleMouseDown = (
-        e: Konva.KonvaEventObject<MouseEvent>
-    ) => {
-
-        const stage = stageRef.current
-        if (!stage) return
-
-        // PAN (middle mouse)
-        if (e.evt.button === 1) {
-
-            isDragging.current = true
-
-            lastPointer.current = {
-                x: e.evt.clientX,
-                y: e.evt.clientY,
+    const { handleMouseDown, handleMouseMove, handleMouseUp, selectionBoxRef } = useMouseHandlers({
+        stageRef, viewportRef, requestDraw,
+        onWorldPosition: (worldX, worldY) => {
+            const state = useEditorStore.getState();
+            if (state.interaction.hoveredEdgeId) {
+                const over = state.document.nodes.find(n =>
+                    worldX >= n.x && worldX <= n.x + n.width &&
+                    worldY >= n.y && worldY <= n.y + n.height
+                );
+                useEditorStore.getState().actions.setAnchorHighlightNodeId(over?.id ?? null);
             }
+        },
+        onSelectStart: () => {
+            useEditorStore.getState().actions.selectNode(null);
+            useEditorStore.getState().actions.deleteSelection();
+        },
+        onPanMove: panBy,
+    });
 
-            return
+    const { handleDragOver, handleDrop } = useDragDrop({ stageRef, viewportRef });
+
+    // === COLLABORATION ===
+    // Room name derived from document ID in URL → shared editing session
+    const collab = useDiagramCollaboration(`diagram:${documentId}`, "ws://localhost:1234");
+
+    const { throttledCursorUpdate, startFieldEdit, endFieldEdit } = useCollaborationSync({
+        viewportRef,
+        updateLocalCursor: collab.updateLocalCursor,
+        updateLocalSelection: collab.updateLocalSelection,
+        updateLocalInteraction: collab.updateLocalInteraction,
+        updateEditingField: collab.updateEditingField,
+    });
+
+    // Синхронизация курсора
+    const _handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
+        handleMouseMove(e);
+        const pos = stageRef.current?.getPointerPosition();
+        if (pos && typeof collab.updateLocalCursor === 'function') {
+            const worldX = (pos.x - viewportRef.current.x) / viewportRef.current.zoom;
+            const worldY = (pos.y - viewportRef.current.y) / viewportRef.current.zoom;
+            throttledCursorUpdate?.(worldX, worldY);
         }
+    }, [collab, viewportRef, handleMouseMove, throttledCursorUpdate]);
 
-        // click on empty canvas -> clear selection
-        if (e.target === stage) {
-            selectNode(null)
-            deleteSelection()
+    // === KEYBOARD ===
+    const isCollab = useEditorStore(s => !!s.yjsContext);
+    const pastLen = useEditorStore(s => isCollab ? (window as any).diagramUndoManager?.undoStack?.length || 0 : s.history.past.length);
+    const futureLen = useEditorStore(s => isCollab ? (window as any).diagramUndoManager?.redoStack?.length || 0 : s.history.future.length);
 
-            const pos = stage.getPointerPosition()
-            if (!pos) return
+    useKeyboardShortcuts({
+        onUndo: useEditorStore(s => s.actions.undo),
+        onRedo: useEditorStore(s => s.actions.redo),
+        onDelete: useEditorStore(s => s.actions.deleteSelection),
+        pastLen, futureLen,
+    });
 
-            // selection box
-            selectionStart.current = pos
-            selectionBox.current = {
-                active: true,
-                x: pos.x,
-                y: pos.y,
-                width: 0,
-                height: 0,
-            }
-
-            requestDraw('overlay')
-            return
-        }
-
-    }
-
-    const handleMouseMove = (
-        e: Konva.KonvaEventObject<MouseEvent>
-    ) => {
-
-        const stage = stageRef.current
-
-        if (!stage) return
-
-        const pos =
-            stage.getPointerPosition()
-
-        if (!pos) return
-
-        const worldX =
-            (pos.x - viewportRef.current.x)
-            / viewportRef.current.zoom
-
-        const worldY =
-            (pos.y - viewportRef.current.y)
-            / viewportRef.current.zoom
-
-        {
-            const st = useEditorStore.getState()
-            if (st.interaction.hoveredEdgeId) {
-                const docNodes = st.document.nodes
-                const over = docNodes.find(n =>
-                    worldX >= n.x &&
-                    worldX <= n.x + n.width &&
-                    worldY >= n.y &&
-                    worldY <= n.y + n.height
-                )
-                setAnchorHighlightNodeId(over?.id ?? null)
-            } else {
-                setAnchorHighlightNodeId(null)
-            }
-        }
-
-        // CONNECTION DRAG
-        if (isConnecting.current) {
-
-            tempConnection.current.toX =
-                worldX
-
-            tempConnection.current.toY =
-                worldY
-
-            requestDraw('edges')
-
-            return
-        }
-
-        // PAN
-        if (isDragging.current) {
-
-            const dx =
-                e.evt.clientX -
-                lastPointer.current.x
-
-            const dy =
-                e.evt.clientY -
-                lastPointer.current.y
-
-            viewportRef.current.x += dx
-            viewportRef.current.y += dy
-
-            applyViewport()
-
-            lastPointer.current = {
-                x: e.evt.clientX,
-                y: e.evt.clientY,
-            }
-
-            return
-        }
-
-        // SELECTION
-        if (selectionStart.current) {
-
-            const start =
-                selectionStart.current
-
-            selectionBox.current = {
-                active: true,
-                x: Math.min(start.x, pos.x),
-                y: Math.min(start.y, pos.y),
-                width: Math.abs(pos.x - start.x),
-                height: Math.abs(pos.y - start.y),
-            }
-
-            requestDraw('overlay')
-        }
-    }
-
-    const handleMouseUp = () => {
-
-        if (isConnecting.current) {
-            cancelConnection()
-        }
-        isDragging.current = false
-        selectionStart.current = null
-        selectionBox.current = {
-            active: false,
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-        }
-
-        requestDraw('overlay')
-    }
-
-    const handleWheel = (
-        e: Konva.KonvaEventObject<WheelEvent>
-    ) => {
-
-        e.evt.preventDefault()
-
-        // zoom
-        if (e.evt.ctrlKey) {
-
-            const scaleBy = 1.1
-
-            viewportRef.current.zoom =
-                e.evt.deltaY > 0
-                    ? viewportRef.current.zoom / scaleBy
-                    : viewportRef.current.zoom * scaleBy
-
-            viewportRef.current.zoom =
-                Math.max(
-                    0.2,
-                    Math.min(4, viewportRef.current.zoom)
-                )
-
-            applyViewport()
-
-            return
-        }
-
-        // horizontal
-        if (e.evt.shiftKey) {
-
-            viewportRef.current.x -= e.evt.deltaY
-
-            applyViewport()
-
-            return
-        }
-
-        // vertical
-        viewportRef.current.y -=
-            e.evt.deltaY
-
-        applyViewport()
-    }
-
-    // INIT
-    useEffect(() => {
-        applyViewport()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect(() => {
-        const onKeyDown = (event: KeyboardEvent) => {
-            // не перехватываем хоткеи при вводе в инпуты/контент-эдиторы
-            const target = event.target as HTMLElement | null
-            const tag = target?.tagName?.toLowerCase()
-            if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) {
-                return
-            }
-
-            // Ctrl/Cmd+Z => Undo, Ctrl/Cmd+Y => Redo
-            if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
-                if (pastLen === 0) return
-                event.preventDefault()
-                undo()
-                return
-            }
-
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') {
-                if (futureLen === 0) return
-                event.preventDefault()
-                redo()
-                return
-            }
-
-            if (event.key !== 'Delete') {
-                return
-            }
-
-            event.preventDefault()
-            deleteSelection()
-        }
-
-        window.addEventListener('keydown', onKeyDown)
-        return () => {
-            window.removeEventListener('keydown', onKeyDown)
-        }
-    }, [deleteSelection, pastLen, futureLen, undo, redo])
-
-
-    // DRAG & DROP FROM SIDEBAR
-    const handleDragOver = (e: Konva.KonvaEventObject<DragEvent>) => {
+    // === WHEEL ===
+    const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
-        e.evt.dataTransfer && (e.evt.dataTransfer.dropEffect = 'copy');
-    }
-
-    const handleDrop = (e: Konva.KonvaEventObject<DragEvent>) => {
-        e.evt.preventDefault();
-
-        const type = e.evt.dataTransfer?.getData('application/diagram-node-type');
-        if (!type) return;
-
         const stage = stageRef.current;
         if (!stage) return;
 
-        const pointer = stage.getPointerPosition();
-        if (!pointer) return;
+        if (e.evt.ctrlKey) {
+            const pointer = stage.getPointerPosition();
+            if (pointer) {
+                zoomAtPointer(pointer, e.evt.deltaY);
+                setTimeout(() => {
+                    const { x, y, zoom } = viewportRef.current;
+                    setViewportAction(x, y, zoom);
+                }, 0);
+            }
+            return;
+        }
+        if (e.evt.shiftKey) {
+            panBy(-e.evt.deltaY, 0);
+        } else {
+            panBy(0, -e.evt.deltaY);
+        }
+    };
 
-        const worldX = (pointer.x - viewportRef.current.x) / viewportRef.current.zoom;
-        const worldY = (pointer.y - viewportRef.current.y) / viewportRef.current.zoom;
+    // === INIT ===
+    useEffect(() => {
+        applyViewportWithSync();
+        return () => { cleanupDraw(); };
+    }, [applyViewportWithSync, cleanupDraw]);
 
-        useEditorStore.getState().actions.addNode(createNode(type, worldX, worldY));
-    }
+    const selectionBox = useSelectionBox();
+    const viewport = useViewport();
 
     // RENDER
     return (
         <Stage
-            
             ref={stageRef}
-
             width={window.innerWidth}
             height={window.innerHeight}
-
             onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
+            onMouseMove={_handleMouseMove}
             onMouseUp={handleMouseUp}
             onWheel={handleWheel}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
-            {/*GRID*/}
-            <Layer ref={gridLayerRef}>
-                <GridLayer />
-            </Layer>
-            {/*NODES*/}
-            <Layer ref={nodeLayerRef}>
+            <Layer ref={layerRefs.grid}><GridLayer /></Layer>
+            <Layer ref={layerRefs.nodes}>
                 <NodeLayer
+                    isEditable={isEditable}
                     tempConnectionRef={tempConnection}
                     isConnectingRef={isConnecting}
                     onStartConnection={startConnection}
                     onFinishConnection={finishConnection}
+                    onStartEditing={(nodeId) => startFieldEdit(nodeId, 'label')}
+                    onStopEditing={endFieldEdit}
                 />
-                <TransformerLayer
-                    stageRef={stageRef}
-                />
+                <TransformerLayer stageRef={stageRef}/>
             </Layer>
-            {/*EDGES (above nodes for handles)*/}
-            <Layer ref={edgeLayerRef}>
+            <Layer ref={layerRefs.edges}>
                 <EdgeLayer />
-                <TemporaryEdge
-                    connectionRef={tempConnection}/>
+                <TemporaryEdge connectionRef={tempConnection}/>
             </Layer>
-            <Layer ref={handlesLayerRef}>
-                <EdgeHandlesOverlay />
+            <Layer ref={layerRefs.handles}><EdgeHandlesOverlay /></Layer>
+            <Layer ref={layerRefs.overlay} listening={false}>
+                <SelectionLayer box={selectionBox}/>
             </Layer>
-            {/*OVERLAY*/}
-            <Layer
-                ref={overlayLayerRef}
-                listening={false}
-            >
-                <SelectionLayer
-                    box={selectionBox.current}/>
-            </Layer>
+            <RemoteCursorsLayer viewport={viewport} />
         </Stage>
     )
 }

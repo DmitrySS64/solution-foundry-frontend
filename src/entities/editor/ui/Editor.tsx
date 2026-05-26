@@ -1,8 +1,9 @@
+//entities/editor/ui/Editor
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+//import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { ToolbarPlugin } from "@/features/editor/plugins/ToolbarPlugin";
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
@@ -21,6 +22,7 @@ import {TableToolbarPlugin} from "@features/editor/plugins/TableToolbarPlugin.ts
 import {cn} from "@shared/ui/lib/cn";
 import {ProjectHeader} from "@shared/ui/project_page/header/component";
 import {ToggleReadOnlyButton} from "@entities/editor/hook/ToggleReadOnly.tsx";
+import {LexicalYjsPlugin} from '@/features/editor/plugins/LexicalYjsPlugin';
 
 
 const theme = {
@@ -54,6 +56,8 @@ const theme = {
 
 const config = {
     namespace: "notion-clone",
+    // collab will override editable via plugins
+    
     nodes: [
         BlockNode,
         HeadingNode,
@@ -71,11 +75,16 @@ const config = {
 };
 
 export const Editor = () => {
+    const documentId = "test-doc-001";
     return (
         <LexicalComposer initialConfig={config}>
             <ProjectHeader>
                 <ToggleReadOnlyButton text="Редактировать" />
             </ProjectHeader>
+            <LexicalYjsPlugin
+                documentId={documentId}
+                websocketUrl="ws://localhost:1234"
+            />
             <ToolbarPlugin />
             <SlashPlugin/>
             <div className={cn("max-w-2xl max-h-[calc(100vh-250px)] overflow-y-auto mx-auto mt-4 py-4 px-10",
@@ -86,7 +95,6 @@ export const Editor = () => {
                     ErrorBoundary={LexicalErrorBoundary}
                 />
                 <ContextMenuPlugin/>
-                <HistoryPlugin/>
                 <ListPlugin/>
                 <BlockBehaviorPlugin/>
                 <TablePlugin />

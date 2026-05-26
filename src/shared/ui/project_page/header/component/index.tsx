@@ -13,7 +13,7 @@ const ProjectHeader = ({
     return (
         <div className="border-b px-6 py-4 border-border border-b-1 bg-white">
             <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <BreadcrumbNavigation crambs={crumbers} lastFolder='Папка'/>
+                <BreadcrumbNavigation crambs={crumbers} lastFolder='Диаграмма 1'/>
             </div>
             <div className={'flex items-center gap-4'}>
                 {children}

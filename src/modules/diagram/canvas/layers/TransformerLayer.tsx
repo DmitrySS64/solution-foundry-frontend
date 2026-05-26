@@ -4,6 +4,7 @@ import {
 } from 'react-konva'
 
 import {
+    useCallback,
     useEffect,
     useMemo,
     useRef,
@@ -14,7 +15,7 @@ import Konva from 'konva'
 import {
     useSelectionIds,
     useEditorActions,
-    useNodes,
+    useDocument,
 } from '../../store/selectors'
 
 interface Props {
@@ -25,65 +26,69 @@ const TransformerLayer = ({
                               stageRef,
                           }: Props) => {
 
-    const transformerRef =
-        useRef<Konva.Transformer>(null)
+    const transformerRef = useRef<Konva.Transformer>(null)
+    const selection = useSelectionIds()
+    const { nodes = [], edges = [] } = useDocument();
 
-    const selection =
-        useSelectionIds()
-    const nodes =
-        useNodes()
-
-    const { updateNode } =
-        useEditorActions()
+    const safeNodes = Array.isArray(nodes) ? nodes : [];
+    const { updateNode } = useEditorActions()
 
     const selectedNodes = useMemo(
         () => nodes.filter(node => selection.includes(node.id)),
         [nodes, selection]
     )
 
-    const keepRatio =
-        selectedNodes.length > 0
-            && selectedNodes.every(node => {
-                    const preserve = (selectedNodes.find(n => n.id === (node as any).id) as any)?.preserveAspectRatio
+    const keepRatio = useMemo(() => {
+        if (selectedNodes.length === 0) return false;
 
-                if (typeof preserve === 'boolean') {
-                    return preserve
-                }
+        return selectedNodes.every(node => {
+            // Проверка preserveAspectRatio
+            const preserve = (node as any)?.preserveAspectRatio;
+            if (typeof preserve === 'boolean') return preserve;
 
-                const primitives = node.notation?.primitives
-                if (!primitives || primitives.length === 0) {
-                    return node.type === 'circle'
-                }
-                const drawable = primitives.filter(p => p.type !== 'text' && p.type !== 'svg')
-                return drawable.length > 0 && drawable.every(p => p.type === 'circle')
-            })
+            // ✅ Безопасная работа с primitives
+            const primitives = node.notation?.primitives;
+
+            // Если primitives — не массив, считаем что его нет
+            if (!Array.isArray(primitives) || primitives.length === 0) {
+                return node.type === 'circle';
+            }
+
+            const drawable = primitives.filter((p: any) =>
+                p.type !== 'text' && p.type !== 'svg'
+            );
+
+            return drawable.length > 0 && drawable.every((p: any) => p.type === 'circle');
+        });
+    }, [selectedNodes]); // ✅ Добавили зависимость
 
     useEffect(() => {
+        const transformer = transformerRef.current;
+        const stage = stageRef.current;
+        if (!transformer || !stage) return;
 
-        const transformer =
-            transformerRef.current
+        const konvaNodes = selection
+            .map(id => stage.findOne(`#${id}`))
+            .filter((node): node is Konva.Node => node !== null);
 
-        const stage =
-            stageRef.current
+        transformer.nodes(konvaNodes);
+        transformer.getLayer()?.batchDraw();
+    }, [selection, stageRef]);
 
-        if (!transformer || !stage) {
-            return
-        }
+    // ✅ Вынесли логику обновления в отдельную функцию
+    const handleNodeTransform = useCallback((node: Konva.Node) => {
+        const width = Math.max(40, node.width() * node.scaleX());
+        const height = Math.max(40, node.height() * node.scaleY());
+        const matchNode = safeNodes.find(n => n.id === node.id());
+        const canStretch = (matchNode as any)?.canStretch;
 
-        const nodes =
-            selection
-                .map(id =>
-                    stage.findOne(`#${id}`)
-                )
-                .filter(Boolean)
-
-        transformer.nodes(
-            nodes as Konva.Node[]
-        )
-
-        transformer.getLayer()?.batchDraw()
-
-    }, [selection, stageRef])
+        return {
+            x: node.x(),
+            y: node.y(),
+            width: canStretch === false ? Math.max(40, node.width()) : width,
+            height: canStretch === false ? Math.max(40, node.height()) : height,
+        };
+    }, [safeNodes]);
 
     return (
         <Transformer
@@ -93,54 +98,26 @@ const TransformerLayer = ({
             keepRatio={keepRatio}
             enabledAnchors={[
                 'top-left',
-                //'top-center',
                 'top-right',
-                //'middle-left',
-                //'middle-right',
                 'bottom-left',
-                //'bottom-center',
                 'bottom-right',
             ]}
-
+            onTransform={()=>{
+                const transformer = transformerRef.current;
+                if (!transformer) return;
+                transformer.nodes().forEach(node => {
+                    updateNode(node.id(), handleNodeTransform(node));
+                });
+            }}
             onTransformEnd={() => {
-
-                const transformer =
-                    transformerRef.current
-
-                if (!transformer) return
-
-                transformer.nodes().forEach((node) => {
-
-                    const box =
-                        node.getClientRect()
-
-
-
-
-                    const width =
-                        Math.max(
-                            40,
-                            box.width
-                        )
-
-                    const height =
-                        Math.max(
-                            40,
-                            box.height
-                        )
-
-                    const canStretch = (selectedNodes.find(n => n.id === (node as any).id()) as any)?.canStretch
-
-                    updateNode(node.id(), {
-                        width: canStretch === false ? Math.max(40, node.width()) : width,
-                        height: canStretch === false ? Math.max(40, node.height()) : height,
-
-                        rotation: node.rotation(),
-                    })
-
-                    node.scaleX(1)
-                    node.scaleY(1)
-                })
+                const transformer = transformerRef.current;
+                if (!transformer) return;
+                transformer.nodes().forEach(node => {
+                    updateNode(node.id(), handleNodeTransform(node));
+                    // Сброс скейла после применения размеров
+                    node.scaleX(1);
+                    node.scaleY(1);
+                });
             }}
         />
     )

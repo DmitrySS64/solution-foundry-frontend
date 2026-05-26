@@ -2,7 +2,7 @@
 import {Circle, Group} from 'react-konva'
 import {useMemo} from 'react'
 import type {DiagramEdge, EdgePoint} from '../../model/types'
-import {useEditorActions, useEdges, useNodes, useSelectionIds} from '../../store/selectors'
+import {useEditorActions, useEdges, useSelectionIds, useDocument} from '../../store/selectors'
 import {useEditorStore} from '@/modules/diagram/store/editor.store.ts'
 import {resolveEdgePoints} from '@/modules/diagram/model/util/edgeGeometry.ts'
 import {snapEdgeEndpointToGraph} from '@/modules/diagram/model/util/edgeEndpointSnap.ts'
@@ -10,7 +10,7 @@ import {syncEdgeKonva} from '@/modules/diagram/model/util/syncEdgeKonva.ts'
 
 const EdgeHandlesOverlay = () => {
     const edges = useEdges()
-    const nodes = useNodes()
+    const { nodes } = useDocument()
     const selectionIds = useSelectionIds()
     const nodeDragActive = useEditorStore(s => s.interaction.nodeDragActive)
     const {updateEdge, selectNode} = useEditorActions()
@@ -75,13 +75,10 @@ const EdgeHandlesOverlay = () => {
                         const next = [...edge.controlPoints]
                         next[index] = {x: e.target.x(), y: e.target.y()}
                         syncEdgeKonva(mergeEdge({controlPoints: next}), nodes)
+                        updateControlPoint(index, { x: e.target.x(), y: e.target.y() })
                     }}
-                    onDragEnd={(e) => {
+                    onDragEnd={() => {
                         useEditorStore.getState().actions.setEdgeHandleDragActive(false)
-                        updateControlPoint(index, {
-                            x: e.target.x(),
-                            y: e.target.y(),
-                        })
                     }}
                     onClick={(e) => {
                         e.cancelBubble = true
@@ -90,6 +87,7 @@ const EdgeHandlesOverlay = () => {
                 />
             ))}
 
+            {/* Серединные точки для добавления новых изгибов */}
             {resolvedPoints.slice(0, -1).map((p, i) => {
                 const next = resolvedPoints[i + 1]
                 const mid = {
@@ -113,6 +111,7 @@ const EdgeHandlesOverlay = () => {
                 )
             })}
 
+            {/* Хвост стрелки (Начало связи) */}
             <Circle
                 x={startPoint.x}
                 y={startPoint.y}
@@ -134,16 +133,8 @@ const EdgeHandlesOverlay = () => {
                             point,
                         },
                     };
-                    syncEdgeKonva(
-                        tempEdge,
-                        //mergeEdge({
-                        //    source: {
-                        //        ...edge.source,
-                        //        point,
-                        //    },
-                        //}),
-                        nodes,
-                    )
+                    syncEdgeKonva(tempEdge, nodes)
+                    updateEdge(edge.id, { source: { ...edge.source, nodeId: undefined, point } })
                 }}
                 onDragEnd={(e) => {
                     useEditorStore.getState().actions.setEdgeHandleDragActive(false)
@@ -156,7 +147,7 @@ const EdgeHandlesOverlay = () => {
                     selectNode(edge.id)
                 }}
             />
-
+            {/* Голова стрелки (Конец связи) */}
             <Circle
                 x={endPoint.x}
                 y={endPoint.y}
@@ -178,16 +169,7 @@ const EdgeHandlesOverlay = () => {
                             point,
                         },
                     };
-                    syncEdgeKonva(
-                        tempEdge,
-                        //mergeEdge({
-                        //    target: {
-                        //        ...edge.target,
-                        //        point,
-                        //    },
-                        //}),
-                        nodes,
-                    )
+                    syncEdgeKonva(tempEdge, nodes,)
                 }}
                 onDragEnd={(e) => {
                     useEditorStore.getState().actions.setEdgeHandleDragActive(false)

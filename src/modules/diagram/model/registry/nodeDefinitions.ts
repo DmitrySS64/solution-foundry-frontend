@@ -14,10 +14,12 @@ import {notations} from './notationRegistry'
 interface NodeDefinition {
     type: NodeType
     label: string
+    defaultLabel?: string
     notation: NodeNotation
     notationGroupId?: string
     box: NotationBoxRules
     renderLabel: boolean
+    textOutsideGroup?: boolean
 
     // п.4: можно указать кастомный рендер для конкретного типа ноды
     customRendererId?: string
@@ -40,6 +42,7 @@ const baseDefinitions: NodeDefinition[] = [
     {
         type: 'rectangle',
         label: 'Rectangle',
+        defaultLabel: 'Node',
         notation: {
             id: 'base.rectangle',
             name: 'Rectangle',
@@ -66,6 +69,7 @@ const baseDefinitions: NodeDefinition[] = [
     {
         type: 'circle',
         label: 'Circle',
+        defaultLabel: 'Node',
         notation: {
             id: 'base.circle',
             name: 'Circle',
@@ -90,6 +94,7 @@ const baseDefinitions: NodeDefinition[] = [
     {
         type: 'diamond',
         label: 'Diamond',
+        defaultLabel: 'Node',
         notation: {
             id: 'base.diamond',
             name: 'Diamond',
@@ -112,6 +117,50 @@ const baseDefinitions: NodeDefinition[] = [
         },
         renderLabel: true,
     },
+    // {
+    //     type: 'image-block',
+    //     label: 'Image',
+    //     defaultLabel: 'Image',
+    //     notation: {
+    //         id: 'base.image-block',
+    //         name: 'Image',
+    //         image: {
+    //             src: '/images/Avatar.png',
+    //             preserveAspectRatio: true,
+    //         },
+    //         preview: '/images/Avatar.png',
+    //         properties: defaultProperties,
+    //     },
+    //     box: {
+    //         initialWidth: 120,
+    //         initialHeight: 90,
+    //         canStretch: true,
+    //         preserveAspectRatio: false,
+    //     },
+    //     renderLabel: true,
+    // },
+    // {
+    //     type: 'svg-image-block',
+    //     label: 'SVG',
+    //     defaultLabel: 'SVG',
+    //     notation: {
+    //         id: 'base.svg-image-block',
+    //         name: 'SVG',
+    //         image: {
+    //             src: '/images/Avatar.svg',
+    //             preserveAspectRatio: true,
+    //         },
+    //         preview: '/images/Avatar.svg',
+    //         properties: defaultProperties,
+    //     },
+    //     box: {
+    //         initialWidth: 120,
+    //         initialHeight: 90,
+    //         canStretch: true,
+    //         preserveAspectRatio: false,
+    //     },
+    //     renderLabel: true,
+    // },
 ]
 
 const nodeDefinitions: NodeDefinition[] = [
@@ -122,10 +171,12 @@ const nodeDefinitions: NodeDefinition[] = [
     ...notations.map(n => ({
         type: n.type,
         label: n.label,
+        defaultLabel: n.defaultLabel,
         notation: n.notation,
         notationGroupId: n.notationId,
         box: n.box,
         renderLabel: n.renderLabel ?? true,
+        textOutsideGroup: n.textOutsideGroup ?? false,
     })),
 
 ]
@@ -143,6 +194,12 @@ const cloneNotation = (
     notation: NodeNotation,
 ): NodeNotation => ({
     ...notation,
+    image: typeof notation.image === 'object'
+        ? { ...notation.image }
+        : notation.image,
+    preview: typeof notation.preview === 'object'
+        ? { ...notation.preview }
+        : notation.preview,
     properties: notation.properties.map(property => ({
         ...property,
         options: property.options
